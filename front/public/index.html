@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebRTC Call</title>
+    <style>
+        video { width: 45%; margin: 1%; border: 1px solid black; }
+    </style>
+</head>
+<body>
+    <h2>WebRTC Video Call</h2>
+    <input id="room" placeholder="Room ID" />
+    <button id="joinBtn">Join</button>
+    <div>
+        <video id="localVideo" autoplay muted></video>
+        <video id="remoteVideo" autoplay></video>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
