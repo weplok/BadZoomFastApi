@@ -22,9 +22,7 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 # Хранилище пользователей
-users_db = []
-
-
+current_user_data: dict = {}
 
 
 @app.get("/homepage", response_class=HTMLResponse)
@@ -97,8 +95,14 @@ async def register_user(
             position=position,
             password=password
         )
-        user_dict = user_record.to_dict()
-        users_db.append(user_dict)
+        current_user_data.clear()  # Очищаем предыдущие данные
+        current_user_data.update({
+            'email': user_record.email,
+            'first_name': user_record.first_name,
+            'last_name': user_record.last_name,
+            'middle_name': user_record.middle_name,
+            'position': user_record.position
+        })
 
         # Перенаправляем на домашнюю страницу
         return RedirectResponse(url="/homepage", status_code=HTTP_303_SEE_OTHER)
@@ -132,7 +136,6 @@ async def sign_user(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-
 @app.get("/sign", response_class=HTMLResponse)
 async def sign_form(request: Request):
     return templates.TemplateResponse(
@@ -142,8 +145,6 @@ async def sign_form(request: Request):
             "title": "Вход пользователя"
         }
     )
-
-
 
 
 # Страница списка пользователей
