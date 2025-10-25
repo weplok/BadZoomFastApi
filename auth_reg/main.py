@@ -123,9 +123,7 @@ async def sign_user(
             raise HTTPException(status_code=400, detail="Пароль должен содержать минимум 6 символов")
 
         response_user = await user_repository.get_sign_user(email, password)
-        if response_user['status']:
-            print('Найден пользователь')
-        else:
+        if not response_user['status']:
             raise HTTPException(status_code=400, detail=response_user['response'])
 
         return RedirectResponse(url="/homepage", status_code=HTTP_303_SEE_OTHER)
