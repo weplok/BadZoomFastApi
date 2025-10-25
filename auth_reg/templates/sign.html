@@ -9,7 +9,7 @@
             <p class="form-subtitle">Заполните все поля</p>
         </div>
 
-        <form id="signForm" class="sign-form" action="/sign" method="post" onsubmit="return validateForm()">
+        <form id="signForm" class="sign-form" action="/sign" method="post" onsubmit="return validateForm('sign')">
 
             <!-- Email -->
             <div class="form-group">
@@ -32,13 +32,13 @@
                 </div>
             </div>
 
-            <button type="submit" class="submit-sign-btn">
-                <span class="btn-sign-text">🚀 Войти </span>
+            <button type="submit" class="submit-btn">
+                <span class="btn-text">🚀 Войти </span>
             </button>
         </form>
 
         <!-- Сообщения об ошибках -->
-        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div id="errorMessage" class="error-message" style="display: none;">Уведомление</div>
 
         <!-- Дополнительная информация -->
         <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
