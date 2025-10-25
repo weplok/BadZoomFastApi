@@ -1,0 +1,7 @@
+general: {
+  enabled = true
+  min_port = 20000
+  max_port = 40000
+  publishers = 6
+  bit_rate = 1024000
+}

@@ -1,0 +1,12 @@
+general: {
+    json = "indented"
+}
+
+http: {
+    enabled = true
+    port = 8088
+}
+
+https: {
+    enabled = false
+}

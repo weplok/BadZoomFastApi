@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  janus:
+    image: canyan/janus-gateway:latest
+    container_name: janus
+    restart: always
+    ports:
+      - "8188:8188"
+      - "20000-40000:20000-40000/udp"
+    volumes:
+      - ./janus-config:/usr/local/etc/janus
+    networks:
+      - janus_net
+
+  web:
+    image: nginx:alpine
+    container_name: web
+    ports:
+      - "8015:80"
+    volumes:
+      - ./web:/usr/share/nginx/html
+    networks:
+      - janus_net
+
+networks:
+  janus_net:
+    driver: bridge
