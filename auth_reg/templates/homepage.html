@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="center-container">
+    <div class="content-card">
+        <div class="head-container">
+      <nav class="main-nav">
+        <a class="btn-head-text" href="">Cоздать комнату</a>
+      </nav>
+            <br>
+            <form id="room-linkForm" class="room-link-form" action="/сonnection_room" method="post" onsubmit="return validateForm()">
+            <div class="form-group">
+                <label for="link" class="form-label">
+                    <span class="label-icon"></span>
+                    Подключиться к комнате
+                </label>
+                <input type="text" id="link" name="link" class="form-input">
+            </div>
+                 <button type="submit" class="submit-btn">
+                <span class="btn-text">Зайти</span>
+            </button>
+        </form>
+    </div>
+
+        <!-- Дополнительная информация -->
+        <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+            <p style="color: #6b7280; font-size: 0.9rem;">
+                ✅ Все поля проверяются в реальном времени<br>
+                🔒 Ваши данные в безопасности
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
