@@ -7,6 +7,8 @@ from pathlib import Path
 from starlette.status import HTTP_303_SEE_OTHER
 
 from database import UserRepository
+from key import generation_key
+
 
 user_repository = UserRepository()
 
@@ -25,15 +27,32 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 current_user_data: dict = {}
 
 
+
+
+
 @app.get("/homepage", response_class=HTMLResponse)
 async def home(request: Request):
+    full_name = '{0} {1} {2}'.format(current_user_data['first_name'], current_user_data['last_name'], current_user_data['middle_name'])
+    is_admin = current_user_data['is_admin']
+
+    if is_admin:
+          return templates.TemplateResponse(
+            "homepage.html",
+            {
+                "request": request,
+                "full_name": full_name,
+                "title": "Домашняя страница"
+            }
+        )
     return templates.TemplateResponse(
-        "homepage.html",
+        "homepage_admin.html",
         {
             "request": request,
-            "title": "Домашний экран"
+            "full_name": full_name,
+            "title": "Домашняя страница"
         }
     )
+
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -45,6 +64,19 @@ async def index(request: Request):
             "title": "Главная страница"
         }
     )
+
+@app.get("/create_room", response_class=HTMLResponse)
+async def index(request: Request):
+    key = generation_key()
+    return templates.TemplateResponse(
+        "create_room.html",
+        {
+            "request": request,
+            "key": key,
+            "title": "Создание комнаты"
+        }
+    )
+
 
 
 @app.get("/register", response_class=HTMLResponse)
@@ -84,7 +116,7 @@ async def register_user(
 
         response_email = await user_repository.get_user_by_email(email)
         if response_email:
-            raise HTTPException(status_code=400, detail="Email уже зарегистрирован")
+            return RedirectResponse(url="/sign", status_code=HTTP_303_SEE_OTHER)
 
         # Регистрируем пользователя
         user_record = await user_repository.create_user(

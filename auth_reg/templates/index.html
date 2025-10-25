@@ -3,18 +3,19 @@
 
 {% block content %}
 
-<header class="index-header">
-    <div class="header-container">
-      <nav class="main-nav">
-        <a class="btn-head-text" href="/sign">Войти</a>
-        <a class="btn-head-text" href="/register">Зарегистрироваться</a>
-      </nav>
-    </div>
-  </header>
 
 <div class="center-container">
     <div class="content-card">
-        <p class="content-text">Какой-то текст</p>
+        <img src="{{ url_for('static', path='images/cat1.jpg') }}">
+        <br>
+        <br>
+        <br>
+        <div class="head-main">
+        <nav class="main-nav">
+        <a class="btn-head-text" href="/sign">Войти</a>
+        <a class="btn-head-text" href="/register">Зарегистрироваться</a>
+      </nav>
+            </div>
 
         <!-- Дополнительная информация -->
         <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
