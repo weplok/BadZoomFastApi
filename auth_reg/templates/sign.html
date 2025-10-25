@@ -2,14 +2,14 @@
 
 {% block content %}
 <div class="center-container">
-    <div class="registration-card">
+    <div class="sign-card">
         <div class="form-header">
             <span class="form-icon">👤</span>
-            <h1>Создание аккаунта</h1>
-            <p class="form-subtitle">Заполните все поля для регистрации</p>
+            <h1>Вход в аккаунт</h1>
+            <p class="form-subtitle">Заполните все поля</p>
         </div>
 
-        <form id="registrationForm" class="registration-form" action="/register" method="post" onsubmit="return validateForm()">
+        <form id="signForm" class="sign-form" action="/sign" method="post" onsubmit="return validateForm()">
 
             <!-- Email -->
             <div class="form-group">
@@ -20,41 +20,6 @@
                 <input type="email" id="email" name="email" class="form-input" placeholder="your.email@example.com" required>
             </div>
 
-            <!-- Личные данные в одном ряду -->
-            <div class="form-row" style="display: flex; gap: 15px;">
-                <div class="form-group" style="flex: 1;">
-                    <label for="last_name" class="form-label">
-                        <span class="label-icon"></span>
-                        Фамилия
-                    </label>
-                    <input type="text" id="last_name" name="last_name" class="form-input" placeholder="Иванов" required>
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="first_name" class="form-label">
-                        <span class="label-icon"></span>
-                        Имя
-                    </label>
-                    <input type="text" id="first_name" name="first_name" class="form-input" placeholder="Иван" required>
-                </div>
-            </div>
-
-            <!-- Отчество -->
-            <div class="form-group">
-                <label for="middle_name" class="form-label">
-                    <span class="label-icon"></span>
-                    Отчество
-                </label>
-                <input type="text" id="middle_name" name="middle_name" class="form-input" placeholder="Иванович">
-            </div>
-
-            <!-- Должность -->
-            <div class="form-group">
-                <label for="position" class="form-label">
-                    <span class="label-icon">💼</span>
-                    Должность
-                </label>
-                <input type="text" id="position" name="position" class="form-input" placeholder="Менеджер проектов" required>
-            </div>
 
             <!-- Пароли в одном ряду -->
             <div class="form-row" style="display: flex; gap: 5px;">
@@ -65,17 +30,10 @@
                     </label>
                     <input type="password" id="password" name="password" class="form-input" placeholder="Введите пароль" required>
                 </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="password_confirm" class="form-label">
-                        <span class="label-icon">🔒</span>
-                        Подтверждение
-                    </label>
-                    <input type="password" id="password_confirm" name="password_confirm" class="form-input" placeholder="Повторите пароль" required>
-                </div>
             </div>
 
-            <button type="submit" class="submit-btn">
-                <span class="btn-text">🚀 Зарегистрироваться</span>
+            <button type="submit" class="submit-sign-btn">
+                <span class="btn-sign-text">🚀 Войти </span>
             </button>
         </form>
 
@@ -91,6 +49,5 @@
         </div>
     </div>
 </div>
-
 
 {% endblock %}

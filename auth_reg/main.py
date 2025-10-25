@@ -84,6 +84,38 @@ async def register_user(
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@app.post("/sign")
+async def sign_user(
+        request: Request,
+        email: str = Form(...),
+        password: str = Form(...),
+):
+    try:
+        # Проверка email
+        if "@" not in email:
+            raise HTTPException(status_code=400, detail="Неверный формат email")
+        #дописать проверку на пароль и почту в бд
+
+        if len(password) < 6:
+            raise HTTPException(status_code=400, detail="Пароль должен содержать минимум 6 символов")
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/sign", response_class=HTMLResponse)
+async def sign_form(request: Request):
+    return templates.TemplateResponse(
+        "sign.html",
+        {
+            "request": request,
+            "title": "Вход пользователя"
+        }
+    )
+
+
+
+
 # Страница списка пользователей
 @app.get("/users", response_class=HTMLResponse)
 async def users_list(request: Request):
