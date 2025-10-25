@@ -7,4 +7,4 @@ COPY janus-config/ /usr/local/etc/janus/
 # 20000-40000 — RTP/RTCP для медиа
 EXPOSE 8188 8088 20000-40000/udp
 
-ENTRYPOINT ["/opt/janus/bin/janus"]
+ENTRYPOINT ["/usr/local/bin/janus"]
