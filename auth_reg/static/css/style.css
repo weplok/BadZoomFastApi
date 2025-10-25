@@ -198,6 +198,8 @@ body {
     transform: translateY(-1px);
 }
 
+
+
 /* Сообщения об ошибках */
 .error-message {
     background: var(--error-color);
