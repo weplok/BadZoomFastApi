@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Request, Form, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import os
 from pathlib import Path
+from starlette.status import HTTP_303_SEE_OTHER
 
 from database import UserRepository
 
@@ -22,6 +23,19 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 # Хранилище пользователей
 users_db = []
+
+
+
+
+@app.get("/homepage", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse(
+        "homepage.html",
+        {
+            "request": request,
+            "title": "Домашний экран"
+        }
+    )
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -86,15 +100,8 @@ async def register_user(
         user_dict = user_record.to_dict()
         users_db.append(user_dict)
 
-        # Перенаправляем на страницу успеха
-        return templates.TemplateResponse(
-            "success.html",
-            {
-                "request": request,
-                "user": user_record,
-                "title": "Регистрация успешна!"
-            }
-        )
+        # Перенаправляем на домашнюю страницу
+        return RedirectResponse(url="/homepage", status_code=HTTP_303_SEE_OTHER)
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -121,8 +128,11 @@ async def sign_user(
         else:
             raise HTTPException(status_code=400, detail=response_user['response'])
 
+        return RedirectResponse(url="/homepage", status_code=HTTP_303_SEE_OTHER)
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 
 @app.get("/sign", response_class=HTMLResponse)

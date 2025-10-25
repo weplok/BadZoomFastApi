@@ -1,8 +1,0 @@
-INFO:httpx:HTTP Request: POST http://localhost:8011/process_message "HTTP/1.1 200 OK"
-INFO:root:<Response [200 OK]>
-INFO:httpx:HTTP Request: POST http://localhost:8011/process_message "HTTP/1.1 200 OK"
-INFO:root:"{\"status\": \"ok\"}"
-INFO:httpx:HTTP Request: POST http://localhost:8011/process_message "HTTP/1.1 200 OK"
-INFO:root:{"status":"ok","validation":"OK"}
-INFO:httpx:HTTP Request: POST http://localhost:8011/process_message "HTTP/1.1 200 OK"
-INFO:root:{"status":"ok","validation":"Запрещённое слово: дурак"}
