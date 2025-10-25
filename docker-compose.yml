@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  main:
+    build: ./chat_main
+    container_name: chat_main
+    ports:
+      - "8010:8010"
+    environment:
+      - PROCESSOR_URL=http://processor:8001
+    depends_on:
+      - processor
+    volumes:
+      - ./chat_main:/app
+    restart: unless-stopped
+
+  processor:
+    build: ./chat_processor
+    container_name: chat_processor
+    ports:
+      - "8011:8011"
+    volumes:
+      - ./chat_processor:/app
+    restart: unless-stopped

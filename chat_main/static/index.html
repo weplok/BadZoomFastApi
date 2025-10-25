@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>FastAPI Chat</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; }
+    #messages { border: 1px solid #ccc; height: 400px; overflow-y: auto; padding: 5px; }
+    input { width: 80%; }
+  </style>
+</head>
+<body>
+  <h2>Мини-чат</h2>
+  <div id="messages"></div>
+  <input id="messageInput" placeholder="Введите сообщение..." />
+  <button id="sendBtn">Отправить</button>
+
+  <script>
+    const ws = new WebSocket(`ws://${location.host}/ws`);
+    const messagesDiv = document.getElementById('messages');
+    const input = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      const p = document.createElement('p');
+      p.textContent = `${msg.sender}: ${msg.text}`;
+      messagesDiv.appendChild(p);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    };
+
+    sendBtn.onclick = () => {
+      ws.send(input.value);
+      input.value = '';
+    };
+  </script>
+</body>
+</html>
