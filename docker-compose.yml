@@ -22,3 +22,12 @@ services:
     volumes:
       - ./chat_processor:/app
     restart: unless-stopped
+
+  auth_reg:
+    build: ./auth_reg
+    container_name: auth_reg
+    ports:
+      - "8009:8009"
+    volumes:
+      - ./auth_reg:/app
+    restart: unless-stopped

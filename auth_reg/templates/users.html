@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="users-container">
+    <div class="users-header">
+        <h2>👥 Зарегистрированные пользователи</h2>
+        <p class="users-count">Всего пользователей: {{ users|length }}</p>
+    </div>
+
+    {% if users %}
+    <div class="users-list">
+        {% for user in users %}
+        <div class="user-card">
+            <div class="user-avatar">{{ user.first_name[0] }}{{ user.last_name[0] }}</div>
+            <div class="user-info">
+                <h3>{{ user.last_name }} {{ user.first_name }} {{ user.middle_name }}</h3>
+                <p class="user-email">📧 {{ user.email }}</p>
+                <p class="user-position">💼 {{ user.position }}</p>
+                <p class="user-id">🆔 ID: {{ user.id }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">😔</div>
+        <h3>Пользователи не найдены</h3>
+        <p>Пока нет зарегистрированных пользователей.</p>
+        <a href="/" class="action-btn primary">📝 Зарегистрировать первого пользователя</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="center-container">
+    <div class="registration-card">
+        <div class="success-container">
+            <div class="success-icon">🎉</div>
+            <h2>Регистрация успешна!</h2>
+            <p style="color: #6b7280; margin-bottom: 2rem;">Пользователь успешно зарегистрирован в системе</p>
+
+            <div class="user-info">
+                <div class="user-detail">
+                    <span class="detail-label">📧 Email:</span>
+                    <span class="detail-value">{{ user.email }}</span>
+                </div>
+                <div class="user-detail">
+                    <span class="detail-label">👤 ФИО:</span>
+                    <span class="detail-value">{{ user.last_name }} {{ user.first_name }} {{ user.middle_name }}</span>
+                </div>
+                <div class="user-detail">
+                    <span class="detail-label">💼 Должность:</span>
+                    <span class="detail-value">{{ user.position }}</span>
+                </div>
+                <div class="user-detail">
+                    <span class="detail-label">🆔 ID:</span>
+                    <span class="detail-value">#{{ user.id }}</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="/" class="btn btn-primary">📝 Новая регистрация</a>
+                <a href="/users" class="btn btn-secondary">👥 Все пользователи</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Декоративные элементы -->
+<div class="decoration decoration-1"></div>
+<div class="decoration decoration-2"></div>
+{% endblock %}
