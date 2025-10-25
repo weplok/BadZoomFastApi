@@ -57,26 +57,6 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.sign-card {
-    background: var(--card-background);
-    padding: 3rem;
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-
-}
-
-/* Карточка контента главной страницы*/
-.content-card {
-    background: var(--card-background);
-    padding: 3rem;
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
 /* Заголовок */
 .form-header {
     text-align: center;
@@ -103,12 +83,6 @@ body {
 
 /* Форма */
 .registration-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.sign-form {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -156,7 +130,7 @@ body {
 }
 
 /* Кнопка отправки */
-.submit-registration-btn {
+.submit-btn {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
     border: none;
@@ -170,24 +144,6 @@ body {
     position: relative;
     overflow: hidden;
 }
-
-.submit-sign-btn {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    border: none;
-    padding: 1.2rem;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 1rem;
-    position: relative;
-    overflow: hidden;
-}
-
-
-
 
 .submit-btn:hover {
     transform: translateY(-3px);
@@ -330,90 +286,4 @@ body {
 
 .form-row .form-group {
     flex: 1;
-}
-
-
-.index-header {
-    width: 100%;
-    background: var(--card-background);
-    box-shadow: var(--shadow);
-    border-bottom: 1px solid var(--border-color);
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 100;
-    backdrop-filter: blur(10px);
-    animation: fadeInDown 0.6s ease-out;
-}
-
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.header-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 1rem 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-/* Навигация в шапке */
-.main-nav {
-    display: flex;
-    gap: 1rem;
-}
-
-/* Ссылки в шапке */
-.btn-head-text {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1rem;
-    padding: 0.6rem 1.2rem;
-    border: 2px solid var(--primary-color);
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    background: white;
-}
-
-/* Эффект наведения */
-.btn-head-text:hover {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
-    transform: translateY(-2px);
-}
-
-/* При нажатии */
-.btn-head-text:active {
-    transform: translateY(0);
-    box-shadow: none;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    .header-container {
-        justify-content: center;
-        padding: 0.8rem 1rem;
-    }
-
-    .main-nav {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.8rem;
-    }
-
-    .btn-head-text {
-        width: 100%;
-        text-align: center;
-    }
 }

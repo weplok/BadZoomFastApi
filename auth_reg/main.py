@@ -20,16 +20,27 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 users_db = []
 
 
-# Главная страница - форма регистрации
 @app.get("/", response_class=HTMLResponse)
-async def registration_form(request: Request):
+async def index(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "title": "Главная страница"
+        }
+    )
+
+
+@app.get("/register", response_class=HTMLResponse)
+async def register(request: Request):
     return templates.TemplateResponse(
         "register.html",
         {
             "request": request,
-            "title": "Регистрация пользователя"
+            "title": "Регистрация"
         }
     )
+
 
 # Обработка формы регистрации
 @app.post("/register")
