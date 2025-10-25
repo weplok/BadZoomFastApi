@@ -1,9 +1,14 @@
+import logging
+import os
+
+import asyncio
+import datetime
+import httpx
+import json
+from dotenv import load_dotenv
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import HTMLResponse
 from sqlmodel import SQLModel, Field, create_engine, Session, select
-import httpx, asyncio, json, datetime
-from dotenv import load_dotenv
-import os
 
 app = FastAPI()
 
@@ -13,6 +18,7 @@ load_dotenv()
 SERVER_KEY = os.getenv("SERVER_KEY")
 PROCESSOR_URL = os.getenv("PROCESSOR_URL")
 connected_clients = set()
+logging.basicConfig(filename="log.txt", level=logging.INFO)
 
 
 # ---------- Модель ----------
@@ -73,7 +79,9 @@ async def websocket_endpoint(websocket: WebSocket):
                 session.commit()
                 session.refresh(msg)
 
-            asyncio.create_task(process_message(msg))
+            some = asyncio.create_task(process_message(msg))
+            result = await some
+            logging.info(result.text)
 
             data = {
                 "sender": msg.sender,
@@ -100,7 +108,7 @@ async def websocket_endpoint(websocket: WebSocket):
 async def process_message(msg: Message):
     try:
         async with httpx.AsyncClient() as client:
-            await client.post(f"{PROCESSOR_URL}/process_message", json={
+            return await client.post(f"{PROCESSOR_URL}/process_message", json={
                 "message": msg.text,
                 "sender": msg.sender,
                 "room": "qwerty",
