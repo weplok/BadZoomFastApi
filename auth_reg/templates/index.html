@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<header class="index-header">
+    <div class="header-container">
+      <nav class="main-nav">
+        <a class="btn-head-text" href="/sign">Войти</a>
+        <a class="btn-head-text" href="/register">Зарегистрироваться</a>
+      </nav>
+    </div>
+  </header>
+
+<div class="center-container">
+    <div class="content-card">
+        <p class="content-text">Какой-то текст</p>
+
+        <!-- Дополнительная информация -->
+        <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+            <p style="color: #6b7280; font-size: 0.9rem;">
+                ✅ Все поля проверяются в реальном времени<br>
+                🔒 Ваши данные в безопасности
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

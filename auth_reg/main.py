@@ -20,14 +20,24 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 users_db = []
 
 
-# Главная страница - форма регистрации
 @app.get("/", response_class=HTMLResponse)
-async def registration_form(request: Request):
+async def index(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "title": "Главная страница"
+        }
+    )
+
+
+@app.get("/register", response_class=HTMLResponse)
+async def register(request: Request):
     return templates.TemplateResponse(
         "register.html",
         {
             "request": request,
-            "title": "Регистрация пользователя"
+            "title": "Регистрация"
         }
     )
 
@@ -47,7 +57,7 @@ async def register_user(
     try:
         # Проверка email
         if "@" not in email:
-            raise HTTPException(status_code=400, detail="Неверный формат email")
+            raise HTTPException(status_code=400, detail=f"Неверный формат email {email}")
 
         # Проверка паролей
         if password != password_confirm:
@@ -71,8 +81,50 @@ async def register_user(
         }
         users_db.append(user_record)
 
+        # Перенаправляем на страницу успеха
+        return templates.TemplateResponse(
+            "success.html",
+            {
+                "request": request,
+                "user": user_record,
+                "title": "Регистрация успешна!"
+            }
+        )
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/sign")
+async def sign_user(
+        request: Request,
+        email: str = Form(...),
+        password: str = Form(...),
+):
+    try:
+        # Проверка email
+        if "@" not in email:
+            raise HTTPException(status_code=400, detail="Неверный формат email")
+        #дописать проверку на пароль и почту в бд
+
+        if len(password) < 6:
+            raise HTTPException(status_code=400, detail="Пароль должен содержать минимум 6 символов")
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/sign", response_class=HTMLResponse)
+async def sign_form(request: Request):
+    return templates.TemplateResponse(
+        "sign.html",
+        {
+            "request": request,
+            "title": "Вход пользователя"
+        }
+    )
+
+
 
 
 # Страница списка пользователей
