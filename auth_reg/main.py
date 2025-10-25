@@ -101,7 +101,10 @@ async def register_user(
             'first_name': user_record.first_name,
             'last_name': user_record.last_name,
             'middle_name': user_record.middle_name,
-            'position': user_record.position
+            'position': user_record.position,
+            'is_connecting_to_rooms': user_record.is_connecting_to_rooms,
+            'is_creating_rooms': user_record.is_creating_rooms,
+            'is_admin': user_record.is_admin
         })
 
         # Перенаправляем на домашнюю страницу
