@@ -1,35 +1,31 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from typing import List
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+clients: dict[str, WebSocket] = {}
 
-
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: List[WebSocket] = []
-
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
-
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
-
-    async def broadcast(self, message: dict, sender: WebSocket):
-        for connection in self.active_connections:
-            if connection != sender:
-                await connection.send_json(message)
-
-
-manager = ConnectionManager()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
+async def websocket_endpoint(ws: WebSocket):
+    await ws.accept()
+    client_id = str(id(ws))
+    clients[client_id] = ws
     try:
+        # notify others about new peer
+        for cid, client in clients.items():
+            if cid != client_id:
+                await client.send_json({"type": "new-peer", "from": client_id})
+
         while True:
-            data = await websocket.receive_json()
-            await manager.broadcast(data, sender=websocket)
+            data = await ws.receive_json()
+            to = data.get("to")
+            if to and to in clients:
+                await clients[to].send_json(data)
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        del clients[client_id]

@@ -1,14 +1,34 @@
-video {
-  background: #222;
-  border-radius: 6px;
-  object-fit: cover;
+.container {
+  text-align: center;
+  padding: 20px;
 }
+
+.videos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.video-wrapper {
+  position: relative;
+}
+
+.video-box {
+  width: 300px;
+  height: 225px;
+  background-color: black;
+  border-radius: 8px;
+}
+
+.controls {
+  margin-top: 10px;
+}
+
 button {
-  margin-right: 8px;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  background: #2b7;
-  color: #042;
+  padding: 8px 15px;
+  margin: 0 5px;
+  font-size: 14px;
   cursor: pointer;
 }

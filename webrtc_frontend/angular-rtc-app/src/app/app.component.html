@@ -1,13 +1,20 @@
-<div style="padding: 10px;">
-  <div>
-    <button (click)="toggleVideo()">{{ videoEnabled ? 'Video ON' : 'Video OFF' }}</button>
-    <button (click)="toggleAudio()">{{ audioEnabled ? 'Audio ON' : 'Audio OFF' }}</button>
+<div class="container">
+  <h2>Angular WebRTC Chat</h2>
+
+  <div class="videos">
+    <video #localVideo autoplay muted class="video-box"></video>
+
+    <div *ngFor="let stream of remoteStreams" class="video-wrapper">
+      <video [srcObject]="stream" autoplay class="video-box"></video>
+    </div>
   </div>
 
-  <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
-    <video id="localVideo" autoplay muted playsinline width="200"></video>
-    <ng-container *ngFor="let id of Object.keys(remoteStreams)">
-      <video [srcObject]="remoteStreams[id]" autoplay playsinline width="200"></video>
-    </ng-container>
+  <div class="controls">
+    <button (click)="toggleVideo()">
+      {{ videoEnabled ? 'Turn Off Video' : 'Turn On Video' }}
+    </button>
+    <button (click)="toggleAudio()">
+      {{ audioEnabled ? 'Mute' : 'Unmute' }}
+    </button>
   </div>
 </div>
