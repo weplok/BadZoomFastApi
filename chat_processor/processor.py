@@ -76,16 +76,17 @@ async def process_message(req: Request):
 
     if data.get("server_key", "not-key") != SERVER_KEY:
         logging.error("SERVER-KEY-ERROR")
-        return {"status": "error", "reason": "invalid key"}
+        return "invalid key"
 
     message = data["message"]
     sender = data["sender"]
 
     # ---- Валидация ----
     is_valid, reason = await validate_message(message)
+
     if not is_valid:
         logging.warning(f"Message rejected from {sender}: {reason} | text='{message}'")
-    else:
-        logging.info(f"Message OK from {sender}: {message}")
+        return reason
 
-    return {"status": "ok", "validation": reason}
+    logging.info(f"Message OK from {sender}: {message}")
+    return "OK"
