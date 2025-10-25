@@ -31,7 +31,6 @@ async def registration_form(request: Request):
         }
     )
 
-
 # Обработка формы регистрации
 @app.post("/register")
 async def register_user(
@@ -47,7 +46,7 @@ async def register_user(
     try:
         # Проверка email
         if "@" not in email:
-            raise HTTPException(status_code=400, detail="Неверный формат email")
+            raise HTTPException(status_code=400, detail=f"Неверный формат email {email}")
 
         # Проверка паролей
         if password != password_confirm:
@@ -70,6 +69,16 @@ async def register_user(
             "position": position,
         }
         users_db.append(user_record)
+
+        # Перенаправляем на страницу успеха
+        return templates.TemplateResponse(
+            "success.html",
+            {
+                "request": request,
+                "user": user_record,
+                "title": "Регистрация успешна!"
+            }
+        )
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
