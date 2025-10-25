@@ -195,7 +195,7 @@ class UserRepository:
             if response_user is None:
                 return {'status': False, 'response': 'Не верный пароль', 'user': None}
 
-            return {'status': False, 'response': 'Пользователь найден', 'user': response_user}
+            return {'status': True, 'response': 'Пользователь найден', 'user': response_user}
 
 
     @staticmethod
