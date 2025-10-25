@@ -5,6 +5,10 @@ from fastapi.templating import Jinja2Templates
 import os
 from pathlib import Path
 
+from database import UserRepository
+
+user_repository = UserRepository()
+
 app = FastAPI(title="Система регистрации", version="1.0.0")
 
 # Получаем абсолютный путь к директории проекта
@@ -66,20 +70,21 @@ async def register_user(
         if len(password) < 6:
             raise HTTPException(status_code=400, detail="Пароль должен содержать минимум 6 символов")
 
-        # Проверяем не занят ли email
-        if any(user['email'] == email for user in users_db):
+        response_email = await user_repository.get_user_by_email(email)
+        if response_email:
             raise HTTPException(status_code=400, detail="Email уже зарегистрирован")
 
-        # Сохраняем пользователя
-        user_record = {
-            "id": len(users_db) + 1,
-            "email": email,
-            "first_name": first_name,
-            "last_name": last_name,
-            "middle_name": middle_name,
-            "position": position,
-        }
-        users_db.append(user_record)
+        # Регистрируем пользователя
+        user_record = await user_repository.create_user(
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            middle_name=middle_name,
+            position=position,
+            password=password
+        )
+        user_dict = user_record.to_dict()
+        users_db.append(user_dict)
 
         # Перенаправляем на страницу успеха
         return templates.TemplateResponse(
@@ -110,6 +115,12 @@ async def sign_user(
         if len(password) < 6:
             raise HTTPException(status_code=400, detail="Пароль должен содержать минимум 6 символов")
 
+        response_user = await user_repository.get_sign_user(email, password)
+        if response_user['status']:
+            print('Найден пользователь')
+        else:
+            raise HTTPException(status_code=400, detail=response_user['response'])
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -130,11 +141,13 @@ async def sign_form(request: Request):
 # Страница списка пользователей
 @app.get("/users", response_class=HTMLResponse)
 async def users_list(request: Request):
+    all_users = await user_repository.get_all_users()
+
     return templates.TemplateResponse(
         "users.html",
         {
             "request": request,
-            "users": users_db,
+            "users": all_users,
             "title": "Список пользователей"
         }
     )
