@@ -9,7 +9,7 @@ import re
 # ==============================
 # Настройка логирования
 # ==============================
-logging.basicConfig(filename="logs.txt", level=logging.INFO, format="%(asctime)s - %(message)s")
+logging.basicConfig(filename="chat_processor.log", level=logging.INFO, encoding="UTF-8")
 
 # ==============================
 # Инициализация FastAPI и ключа
