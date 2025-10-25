@@ -116,7 +116,7 @@ async def register_user(
 
         response_email = await user_repository.get_user_by_email(email)
         if response_email:
-            raise HTTPException(status_code=400, detail="Email уже зарегистрирован")
+            return RedirectResponse(url="/sign", status_code=HTTP_303_SEE_OTHER)
 
         # Регистрируем пользователя
         user_record = await user_repository.create_user(
