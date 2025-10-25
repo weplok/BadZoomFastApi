@@ -31,3 +31,12 @@ services:
     volumes:
       - ./auth_reg:/app
     restart: unless-stopped
+
+  video_webcam:
+    build: ./video_webcam
+    container_name: video_webcam
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./video_webcam:/app
+    restart: unless-stopped
