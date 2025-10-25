@@ -32,11 +32,17 @@ services:
       - ./auth_reg:/app
     restart: unless-stopped
 
-  video_webcam:
-    build: ./video_webcam
-    container_name: video_webcam
+  webrtc_backend:
+    build: ./webrtc_backand
+    container_name: webrtc_backend
     ports:
-      - "8008:8008"
-    volumes:
-      - ./video_webcam:/app
-    restart: unless-stopped
+      - "8014:8000"
+
+  webrtc_frontend:
+    build:
+      context: ./webrtc_frontend/angular-rtc-app
+      dockerfile: Dockerfile
+    ports:
+      - "8015:80"
+    depends_on:
+      - webrtc_backend
