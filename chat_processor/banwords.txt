@@ -6,4 +6,4 @@ fuck
 shit
 bitch
 asshole
-moron
+brainfuck

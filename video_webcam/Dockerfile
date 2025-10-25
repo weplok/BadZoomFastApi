@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копируем все файлы проекта в контейнер
 COPY . .
 
-# Открываем порт 8000
+# Открываем порт 8008
 EXPOSE 8008
 
 # Запуск uvicorn с вашим приложением
