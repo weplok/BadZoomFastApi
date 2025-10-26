@@ -9,10 +9,11 @@ videosContainer.appendChild(localVideo);
 
 let localStream;
 let peers = {}; // {socketId: RTCPeerConnection}
+let senders = {}; // {socketId: {video: RTCRtpSender, audio: RTCRtpSender}}
 let videoEnabled = true;
 let audioEnabled = true;
 
-// Функция запроса камеры и микрофона
+// Запрос камеры и микрофона
 async function startLocalStream(retry = true) {
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -31,7 +32,6 @@ async function startLocalStream(retry = true) {
     }
 }
 
-// Запуск камеры сразу для desktop, кнопка для Safari/iOS
 if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
     const btn = document.createElement('button');
     btn.innerText = "Включить камеру";
@@ -51,6 +51,12 @@ videoBtn.onclick = () => {
     if (!localStream) return;
     videoEnabled = !videoEnabled;
     localStream.getVideoTracks().forEach(track => track.enabled = videoEnabled);
+
+    // Отключаем/включаем отправку видео по всем peerConnection
+    Object.values(senders).forEach(s => {
+        if (s.video) s.video.track.enabled = videoEnabled;
+    });
+
     videoBtn.innerText = videoEnabled ? "Выкл видео" : "Вкл видео";
 };
 
@@ -60,6 +66,12 @@ audioBtn.onclick = () => {
     if (!localStream) return;
     audioEnabled = !audioEnabled;
     localStream.getAudioTracks().forEach(track => track.enabled = audioEnabled);
+
+    // Отключаем/включаем отправку аудио по всем peerConnection
+    Object.values(senders).forEach(s => {
+        if (s.audio) s.audio.track.enabled = audioEnabled;
+    });
+
     audioBtn.innerText = audioEnabled ? "Выкл звук" : "Вкл звук";
 };
 
@@ -84,21 +96,23 @@ function createPeerConnection(socketId) {
         iceCandidatePoolSize: 10
     });
 
-    // Добавляем локальные треки, клонируем поток
+    senders[socketId] = { video: null, audio: null };
+
+    // Добавляем локальные треки и сохраняем RTCRtpSender
     if (localStream) {
-        localStream.getTracks().forEach(track => peer.addTrack(track.clone(), localStream));
-    } else {
-        console.warn("⏳ localStream ещё не готов при создании peerConnection");
+        localStream.getTracks().forEach(track => {
+            const sender = peer.addTrack(track, localStream);
+            if (track.kind === 'video') senders[socketId].video = sender;
+            if (track.kind === 'audio') senders[socketId].audio = sender;
+        });
     }
 
-    // ICE кандидаты
     peer.onicecandidate = event => {
         if (event.candidate) {
             socket.emit('ice-candidate', { candidate: event.candidate, to: socketId, from: socket.id });
         }
     };
 
-    // Получаем удаленные треки
     peer.ontrack = event => {
         let remoteVideo = document.getElementById(socketId);
         if (!remoteVideo) {
@@ -112,7 +126,6 @@ function createPeerConnection(socketId) {
         remoteVideo.play().catch(err => console.warn("⚠️ Не удалось автозапустить remote video:", err));
     };
 
-    // Лог состояния соединения
     peer.onconnectionstatechange = () => {
         console.log(`🔗 ${socketId} connection state:`, peer.connectionState);
     };
@@ -136,7 +149,6 @@ socket.on('new-user', async socketId => {
 });
 
 socket.on('offer', async data => {
-    console.log("📩 Получен offer от", data.from);
     const peer = createPeerConnection(data.from);
     peers[data.from] = peer;
 
@@ -175,6 +187,7 @@ socket.on('user-disconnected', socketId => {
     if (peers[socketId]) {
         peers[socketId].close();
         delete peers[socketId];
+        delete senders[socketId];
         const vid = document.getElementById(socketId);
         if (vid) vid.remove();
     }
