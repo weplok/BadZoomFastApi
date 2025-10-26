@@ -1,58 +1,22 @@
 const socket = io();
-const videosContainer = document.getElementById('videos');
 
+// Контейнеры и видео
+const videosContainer = document.getElementById('videos');
+const localVideo = document.createElement('video');
+localVideo.autoplay = true;
+localVideo.muted = true;
+localVideo.playsInline = true;
+
+// Храним peerConnection и отправляемые треки
 let localStream;
 let peers = {};   // {socketId: RTCPeerConnection}
 let senders = {}; // {socketId: {video: RTCRtpSender, audio: RTCRtpSender}}
 let videoEnabled = true;
 let audioEnabled = true;
 
-// --- Кнопки управления ---
-const controls = document.createElement('div');
-controls.style.margin = "10px";
+videosContainer.appendChild(localVideo);
 
-const videoBtn = document.createElement('button');
-videoBtn.innerText = "Выкл видео";
-videoBtn.onclick = () => {
-    if (!localStream) return;
-    videoEnabled = !videoEnabled;
-    localStream.getVideoTracks().forEach(track => track.enabled = videoEnabled);
-    Object.values(senders).forEach(s => { if (s.video) s.video.track.enabled = videoEnabled; });
-    videoBtn.innerText = videoEnabled ? "Выкл видео" : "Вкл видео";
-    updateLocalIndicators();
-    socket.emit('media-status-changed', { video: videoEnabled, audio: audioEnabled });
-};
-
-const audioBtn = document.createElement('button');
-audioBtn.innerText = "Выкл звук";
-audioBtn.onclick = () => {
-    if (!localStream) return;
-    audioEnabled = !audioEnabled;
-    localStream.getAudioTracks().forEach(track => track.enabled = audioEnabled);
-    Object.values(senders).forEach(s => { if (s.audio) s.audio.track.enabled = audioEnabled; });
-    audioBtn.innerText = audioEnabled ? "Выкл звук" : "Вкл звук";
-    updateLocalIndicators();
-    socket.emit('media-status-changed', { video: videoEnabled, audio: audioEnabled });
-};
-
-controls.appendChild(videoBtn);
-controls.appendChild(audioBtn);
-document.body.appendChild(controls);
-
-// --- Запуск локального потока с повторной попыткой ---
-async function startLocalStream(retry = true) {
-    try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        socket.emit("ready");
-    } catch (err) {
-        console.warn("Ошибка получения камеры/микрофона:", err);
-        if (retry) setTimeout(() => startLocalStream(false), 15000);
-        else alert("Не удалось получить доступ к камере/микрофону.");
-    }
-}
-startLocalStream();
-
-// --- Работа с видео сеткой и индикаторами ---
+// --- Функции работы с индикаторами ---
 function addRemoteVideo(socketId, stream) {
     let container = document.getElementById(`container-${socketId}`);
     if (!container) {
@@ -72,19 +36,20 @@ function addRemoteVideo(socketId, stream) {
         video.style.height = '100%';
         container.appendChild(video);
 
-        const videoIcon = document.createElement('div');
-        videoIcon.id = `video-icon-${socketId}`;
-        videoIcon.style.position = 'absolute';
-        videoIcon.style.top = '50%';
-        videoIcon.style.left = '50%';
-        videoIcon.style.transform = 'translate(-50%, -50%)';
-        videoIcon.style.fontSize = '50px';
-        container.appendChild(videoIcon);
+        const camIcon = document.createElement('span');
+        camIcon.id = `cam-${socketId}`;
+        camIcon.innerText = '👽';
+        camIcon.style.position = 'absolute';
+        camIcon.style.top = '5px';
+        camIcon.style.left = '5px';
+        camIcon.style.fontSize = '50px';
+        container.appendChild(camIcon);
 
         const micIcon = document.createElement('span');
         micIcon.id = `mic-${socketId}`;
+        micIcon.innerText = '🔇';
         micIcon.style.position = 'absolute';
-        micIcon.style.bottom = '5px';
+        micIcon.style.top = '5px';
         micIcon.style.right = '5px';
         micIcon.style.fontSize = '18px';
         container.appendChild(micIcon);
@@ -94,31 +59,83 @@ function addRemoteVideo(socketId, stream) {
 
     const video = document.getElementById(`video-${socketId}`);
     video.srcObject = stream;
-    video.play().catch(() => {});
+    video.play().catch(err => console.warn("⚠️ Не удалось автозапустить video:", err));
 
     updateIndicators(socketId, stream);
 }
 
 function updateIndicators(socketId, stream) {
-    const videoIcon = document.getElementById(`video-icon-${socketId}`);
+    const camIcon = document.getElementById(`cam-${socketId}`);
     const micIcon = document.getElementById(`mic-${socketId}`);
-
     const videoTrack = stream.getVideoTracks()[0];
     const audioTrack = stream.getAudioTracks()[0];
-
-    videoIcon.innerText = (videoTrack && !videoTrack.enabled) ? '👤' : '';
-    micIcon.innerText = (audioTrack && !audioTrack.enabled) ? '🔇' : '';
+    if (camIcon) camIcon.style.opacity = videoTrack && videoTrack.enabled ? '0' : '1';
+    if (micIcon) micIcon.style.opacity = audioTrack && audioTrack.enabled ? '0' : '1';
 }
 
 function updateLocalIndicators() {
-    if (localStream) updateIndicators('local', localStream);
-    Object.keys(peers).forEach(id => {
-        const peer = peers[id];
-        const streams = peer.getSenders().map(s => s.track).filter(Boolean);
-        const streamObj = new MediaStream(streams);
-        updateIndicators(id, streamObj);
-    });
+    if (localStream) addRemoteVideo('local', localStream);
 }
+
+// --- Функция запуска камеры/микрофона с повторной попыткой ---
+async function startLocalStream(retry = true) {
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideo.srcObject = localStream;
+        await localVideo.play().catch(err => console.warn("⚠️ Не удалось автозапустить локальное видео:", err));
+        console.log("🎥 Камера и микрофон активны");
+        addRemoteVideo('local', localStream);
+        socket.emit("ready");
+    } catch (err) {
+        console.error("❌ Ошибка при получении локальной камеры:", err);
+        if (retry) {
+            console.log("⏳ Попробуем снова через 15 секунд...");
+            setTimeout(() => startLocalStream(false), 15000);
+        } else {
+            alert("Не удалось получить доступ к камере/микрофону. Проверьте разрешения.");
+        }
+    }
+}
+
+// --- Автозапуск или кнопка для iOS ---
+if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+    const btn = document.createElement('button');
+    btn.innerText = "Включить камеру";
+    btn.onclick = () => startLocalStream();
+    document.body.appendChild(btn);
+} else {
+    startLocalStream();
+}
+
+// --- Кнопки управления видео/аудио ---
+const controls = document.createElement('div');
+controls.style.margin = "10px";
+
+const videoBtn = document.createElement('button');
+videoBtn.innerText = "Выкл видео";
+videoBtn.onclick = () => {
+    if (!localStream) return;
+    videoEnabled = !videoEnabled;
+    localStream.getVideoTracks().forEach(track => track.enabled = videoEnabled);
+    Object.values(senders).forEach(s => { if (s.video) s.video.track.enabled = videoEnabled; });
+    videoBtn.innerText = videoEnabled ? "Выкл видео" : "Вкл видео";
+    updateLocalIndicators();
+};
+
+const audioBtn = document.createElement('button');
+audioBtn.innerText = "Выкл звук";
+audioBtn.onclick = () => {
+    if (!localStream) return;
+    audioEnabled = !audioEnabled;
+    localStream.getAudioTracks().forEach(track => track.enabled = audioEnabled);
+    Object.values(senders).forEach(s => { if (s.audio) s.audio.track.enabled = audioEnabled; });
+    audioBtn.innerText = audioEnabled ? "Выкл звук" : "Вкл звук";
+    updateLocalIndicators();
+};
+
+controls.appendChild(videoBtn);
+controls.appendChild(audioBtn);
+document.body.appendChild(controls);
 
 // --- Создание peerConnection ---
 function createPeerConnection(socketId) {
@@ -141,7 +158,9 @@ function createPeerConnection(socketId) {
     }
 
     peer.onicecandidate = event => {
-        if (event.candidate) socket.emit('ice-candidate', { candidate: event.candidate, to: socketId, from: socket.id });
+        if (event.candidate) {
+            socket.emit('ice-candidate', { candidate: event.candidate, to: socketId, from: socket.id });
+        }
     };
 
     peer.ontrack = event => addRemoteVideo(socketId, event.streams[0]);
@@ -190,13 +209,4 @@ socket.on('user-disconnected', socketId => {
     delete senders[socketId];
     const container = document.getElementById(`container-${socketId}`);
     if (container) container.remove();
-});
-
-// --- Синхронизация медиа-статусов ---
-socket.on('peer-media-status', data => {
-    const { id, video, audio } = data;
-    const videoIcon = document.getElementById(`video-icon-${id}`);
-    const micIcon = document.getElementById(`mic-${id}`);
-    if (videoIcon) videoIcon.innerText = video ? '' : '👤';
-    if (micIcon) micIcon.innerText = audio ? '' : '🔇';
 });
