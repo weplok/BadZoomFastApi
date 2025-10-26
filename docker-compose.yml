@@ -32,9 +32,10 @@ services:
       - ./auth_reg:/app
     restart: unless-stopped
 
-  turnserver:
-    build: ./turn_server
-    container_name: turnserver
+  turn_server:
+    build:
+      context: ./turn_server
+    container_name: turn_server
     restart: unless-stopped
     ports:
       - "3478:3478"
@@ -42,11 +43,9 @@ services:
       - "5349:5349"
       - "5349:5349/udp"
     environment:
+      - REALM=call.weplok.ru
       - TURN_USER=weplok
       - TURN_PASSWORD=weplok
-      - REALM=call.weplok.ru
-    volumes:
-      - ./turn_server:/app
 
   webrtc_front:
     build: ./webrtc_front
@@ -54,5 +53,5 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - turnserver
+      - turn_server
     restart: unless-stopped
