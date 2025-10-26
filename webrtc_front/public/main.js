@@ -1,90 +1,25 @@
 const socket = io();
-
-// --- Контейнеры и видео ---
-const videosContainer = document.getElementById('videos');
 const localVideo = document.createElement('video');
 localVideo.autoplay = true;
 localVideo.muted = true;
 localVideo.playsInline = true;
 
-// --- Храним peerConnection и отправляемые треки ---
+const videosContainer = document.getElementById('videos');
+videosContainer.appendChild(localVideo);
+
 let localStream;
-let peers = {};   // {socketId: RTCPeerConnection}
+let peers = {}; // {socketId: RTCPeerConnection}
 let senders = {}; // {socketId: {video: RTCRtpSender, audio: RTCRtpSender}}
 let videoEnabled = true;
 let audioEnabled = true;
 
-videosContainer.appendChild(localVideo);
-
-// --- Функции работы с индикаторами ---
-function addRemoteVideo(socketId, stream) {
-    let container = document.getElementById(`container-${socketId}`);
-    if (!container) {
-        container = document.createElement('div');
-        container.id = `container-${socketId}`;
-        container.style.position = 'relative';
-        container.style.display = 'inline-block';
-        container.style.margin = '5px';
-        container.style.width = '200px';
-        container.style.height = '150px';
-
-        const video = document.createElement('video');
-        video.id = `video-${socketId}`;
-        video.autoplay = true;
-        video.playsInline = true;
-        video.style.width = '100%';
-        video.style.height = '100%';
-        container.appendChild(video);
-
-        const camIcon = document.createElement('span');
-        camIcon.id = `cam-${socketId}`;
-        camIcon.innerText = '👽';
-        camIcon.style.position = 'absolute';
-        camIcon.style.top = '5px';
-        camIcon.style.left = '5px';
-        camIcon.style.fontSize = '50px';
-        container.appendChild(camIcon);
-
-        const micIcon = document.createElement('span');
-        micIcon.id = `mic-${socketId}`;
-        micIcon.innerText = '🔇';
-        micIcon.style.position = 'absolute';
-        micIcon.style.top = '5px';
-        micIcon.style.right = '5px';
-        micIcon.style.fontSize = '18px';
-        container.appendChild(micIcon);
-
-        videosContainer.appendChild(container);
-    }
-
-    const video = document.getElementById(`video-${socketId}`);
-    video.srcObject = stream;
-    video.play().catch(err => console.warn("⚠️ Не удалось автозапустить video:", err));
-
-    updateIndicators(socketId, stream);
-}
-
-function updateIndicators(socketId, stream) {
-    const camIcon = document.getElementById(`cam-${socketId}`);
-    const micIcon = document.getElementById(`mic-${socketId}`);
-    const videoTrack = stream.getVideoTracks()[0];
-    const audioTrack = stream.getAudioTracks()[0];
-    if (camIcon) camIcon.style.opacity = videoTrack && videoTrack.enabled ? '0' : '1';
-    if (micIcon) micIcon.style.opacity = audioTrack && audioTrack.enabled ? '0' : '1';
-}
-
-function updateLocalIndicators() {
-    if (localStream) addRemoteVideo('local', localStream);
-}
-
-// --- Запуск локального потока с повторной попыткой ---
+// Запрос камеры и микрофона
 async function startLocalStream(retry = true) {
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         localVideo.srcObject = localStream;
         await localVideo.play().catch(err => console.warn("⚠️ Не удалось автозапустить локальное видео:", err));
         console.log("🎥 Камера и микрофон активны");
-        addRemoteVideo('local', localStream);
         socket.emit("ready");
     } catch (err) {
         console.error("❌ Ошибка при получении локальной камеры:", err);
@@ -97,7 +32,6 @@ async function startLocalStream(retry = true) {
     }
 }
 
-// --- Автозапуск или кнопка для iOS ---
 if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
     const btn = document.createElement('button');
     btn.innerText = "Включить камеру";
@@ -107,7 +41,7 @@ if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
     startLocalStream();
 }
 
-// --- Кнопки управления видео/аудио ---
+// Кнопки управления видео/аудио
 const controls = document.createElement('div');
 controls.style.margin = "10px";
 
@@ -117,10 +51,13 @@ videoBtn.onclick = () => {
     if (!localStream) return;
     videoEnabled = !videoEnabled;
     localStream.getVideoTracks().forEach(track => track.enabled = videoEnabled);
-    Object.values(senders).forEach(s => { if (s.video) s.video.track.enabled = videoEnabled; });
+
+    // Отключаем/включаем отправку видео по всем peerConnection
+    Object.values(senders).forEach(s => {
+        if (s.video) s.video.track.enabled = videoEnabled;
+    });
+
     videoBtn.innerText = videoEnabled ? "Выкл видео" : "Вкл видео";
-    updateLocalIndicators();
-    socket.emit('media-status-changed', { "video": videoEnabled, "audio": audioEnabled });
 };
 
 const audioBtn = document.createElement('button');
@@ -129,31 +66,42 @@ audioBtn.onclick = () => {
     if (!localStream) return;
     audioEnabled = !audioEnabled;
     localStream.getAudioTracks().forEach(track => track.enabled = audioEnabled);
-    Object.values(senders).forEach(s => { if (s.audio) s.audio.track.enabled = audioEnabled; });
+
+    // Отключаем/включаем отправку аудио по всем peerConnection
+    Object.values(senders).forEach(s => {
+        if (s.audio) s.audio.track.enabled = audioEnabled;
+    });
+
     audioBtn.innerText = audioEnabled ? "Выкл звук" : "Вкл звук";
-    updateLocalIndicators();
-    socket.emit('media-status-changed', { 'video': videoEnabled, "audio": audioEnabled });
 };
 
 controls.appendChild(videoBtn);
 controls.appendChild(audioBtn);
 document.body.appendChild(controls);
 
-// --- Создание peerConnection ---
+// Создание peerConnection
 function createPeerConnection(socketId) {
     const peer = new RTCPeerConnection({
         iceServers: [
-            { "urls": 'stun:stun.l.google.com:19302' },
-            { "urls": ['turn:weplok.ru:8347?transport=udp','turn:weplok.ru:8347?transport=tcp'], "username": 'weplok', "credential": 'weplok' }
+            { urls: 'stun:stun.l.google.com:19302' },
+            {
+                urls: [
+                    'turn:weplok.ru:8347?transport=udp',
+                    'turn:weplok.ru:8347?transport=tcp'
+                ],
+                username: 'weplok',
+                credential: 'weplok'
+            }
         ],
         iceCandidatePoolSize: 10
     });
 
     senders[socketId] = { video: null, audio: null };
 
+    // Добавляем локальные треки и сохраняем RTCRtpSender
     if (localStream) {
         localStream.getTracks().forEach(track => {
-            const sender = peer.addTrack(track.clone(), localStream);
+            const sender = peer.addTrack(track, localStream);
             if (track.kind === 'video') senders[socketId].video = sender;
             if (track.kind === 'audio') senders[socketId].audio = sender;
         });
@@ -165,59 +113,82 @@ function createPeerConnection(socketId) {
         }
     };
 
-    peer.ontrack = event => addRemoteVideo(socketId, event.streams[0]);
-    peer.onconnectionstatechange = () => console.log(`🔗 ${socketId} state:`, peer.connectionState);
+    peer.ontrack = event => {
+        let remoteVideo = document.getElementById(socketId);
+        if (!remoteVideo) {
+            remoteVideo = document.createElement('video');
+            remoteVideo.id = socketId;
+            remoteVideo.autoplay = true;
+            remoteVideo.playsInline = true;
+            videosContainer.appendChild(remoteVideo);
+        }
+        remoteVideo.srcObject = event.streams[0];
+        remoteVideo.play().catch(err => console.warn("⚠️ Не удалось автозапустить remote video:", err));
+    };
+
+    peer.onconnectionstatechange = () => {
+        console.log(`🔗 ${socketId} connection state:`, peer.connectionState);
+    };
 
     return peer;
 }
 
-// --- Socket.io события ---
+// Socket.io события
 socket.on('new-user', async socketId => {
+    console.log("🟢 Новый пользователь:", socketId);
     const peer = createPeerConnection(socketId);
     peers[socketId] = peer;
+
     try {
         const offer = await peer.createOffer();
         await peer.setLocalDescription(offer);
         socket.emit('offer', { sdp: offer, to: socketId, from: socket.id });
-    } catch (err) { console.error(err); }
+    } catch (err) {
+        console.error("❌ Ошибка при создании offer:", err);
+    }
 });
 
 socket.on('offer', async data => {
     const peer = createPeerConnection(data.from);
     peers[data.from] = peer;
+
     try {
         await peer.setRemoteDescription(data.sdp);
         const answer = await peer.createAnswer();
         await peer.setLocalDescription(answer);
         socket.emit('answer', { sdp: answer, to: data.from, from: socket.id });
-    } catch (err) { console.error(err); }
+    } catch (err) {
+        console.error("❌ Ошибка при обработке offer:", err);
+    }
 });
 
 socket.on('answer', async data => {
     const peer = peers[data.from];
     if (!peer) return;
-    try { await peer.setRemoteDescription(data.sdp); } catch (err) { console.error(err); }
+    try {
+        await peer.setRemoteDescription(data.sdp);
+    } catch (err) {
+        console.error("❌ Ошибка при обработке answer:", err);
+    }
 });
 
 socket.on('ice-candidate', async data => {
     const peer = peers[data.from];
     if (!peer) return;
-    try { await peer.addIceCandidate(data.candidate); } catch (err) { console.warn(err); }
+    try {
+        await peer.addIceCandidate(data.candidate);
+    } catch (err) {
+        console.warn("⚠️ Ошибка при добавлении ICE:", err);
+    }
 });
 
 socket.on('user-disconnected', socketId => {
-    if (peers[socketId]) peers[socketId].close();
-    delete peers[socketId];
-    delete senders[socketId];
-    const container = document.getElementById(`container-${socketId}`);
-    if (container) container.remove();
-});
-
-// --- Синхронизация медиа-статусов ---
-socket.on('peer-media-status', data => {
-    const { id, video, audio } = data;
-    const camIcon = document.getElementById(`cam-${id}`);
-    const micIcon = document.getElementById(`mic-${id}`);
-    if (camIcon) camIcon.style.opacity = video ? '0' : '1';
-    if (micIcon) micIcon.style.opacity = audio ? '0' : '1';
+    console.log("🔴 Пользователь отключился:", socketId);
+    if (peers[socketId]) {
+        peers[socketId].close();
+        delete peers[socketId];
+        delete senders[socketId];
+        const vid = document.getElementById(socketId);
+        if (vid) vid.remove();
+    }
 });
