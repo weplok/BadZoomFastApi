@@ -25,6 +25,7 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 # Хранилище пользователей
 current_user_data: dict = {}
+key_list: dict = {}
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -42,7 +43,6 @@ async def index(request: Request):
 async def home(request: Request):
     full_name = '{0} {1} {2}'.format(current_user_data['first_name'], current_user_data['last_name'], current_user_data['middle_name'])
     is_admin = current_user_data['is_admin']
-
     if is_admin:
           return templates.TemplateResponse(
               "homepage_admin.html",
@@ -53,7 +53,7 @@ async def home(request: Request):
               }
         )
     return templates.TemplateResponse(
-        "homepage.html.html",
+        "homepage.html",
         {
             "request": request,
             "full_name": full_name,
@@ -136,6 +136,26 @@ async def register_user(
             'is_admin': user_record.is_admin
         })
 
+        # Перенаправляем на домашнюю страницу
+        return RedirectResponse(url="/homepage", status_code=HTTP_303_SEE_OTHER)
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/create_room")
+async def register_user(
+        request: Request,
+        title: str = Form(...),
+        code: str = Form(...)
+):
+    try:
+        key_list.clear()
+        key_list.update({
+            "title": title,
+            "code": code,
+        })
+        print(key_list)
         # Перенаправляем на домашнюю страницу
         return RedirectResponse(url="/homepage", status_code=HTTP_303_SEE_OTHER)
 
