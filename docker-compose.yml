@@ -32,17 +32,9 @@ services:
       - ./auth_reg:/app
     restart: unless-stopped
 
-  webrtc_backend:
-    build: ./webrtc_backand
-    container_name: webrtc_backend
+  webrtc_front:
+    build: ./webrtc_front
+    container_name: webrtc_front
     ports:
-      - "8014:8000"
-
-  webrtc_frontend:
-    build:
-      context: ./webrtc_frontend/angular-rtc-app
-      dockerfile: Dockerfile
-    ports:
-      - "8015:80"
-    depends_on:
-      - webrtc_backend
+      - "3000:3000"
+    restart: unless-stopped
