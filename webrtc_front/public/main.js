@@ -63,17 +63,15 @@ socket.on('user-disconnected', socketId => {
 function createPeerConnection(socketId) {
     const peer = new RTCPeerConnection({
         iceServers: [
-            // Google STUN — чтобы быстрее находить публичный IP
-            { urls: 'stun:stun.l.google.com:19302' },
-
-            {
-                urls: [
-                    'turn:138.124.14.160:3478?transport=udp',
-                    'turn:138.124.14.160:3478?transport=tcp'
-                ],
-                username: 'weplok',
-                credential: 'weplok'
-            }
+          {
+            "urls": [
+              "stun:call.weplok.ru:3478",
+              "turn:call.weplok.ru:3478?transport=udp",
+              "turn:call.weplok.ru:3478?transport=tcp"
+            ],
+            "username": "weplok",
+            "credential": "weplok"
+          }
         ],
 
         // Рекомендуемые настройки для WebRTC
