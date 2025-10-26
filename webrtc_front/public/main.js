@@ -9,27 +9,33 @@ videosContainer.appendChild(localVideo);
 let localStream;
 let peers = {}; // {socketId: RTCPeerConnection}
 
+// Запрашиваем камеру и микрофон
 async function start() {
-    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    localVideo.srcObject = localStream;
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideo.srcObject = localStream;
+        console.log("✅ Камера и микрофон успешно получены");
+        socket.emit("ready"); // уведомляем сервер, что готовы подключаться
+    } catch (err) {
+        console.error("❌ Ошибка доступа к камере или микрофону:", err);
+    }
 }
 
 start();
 
-// Когда приходит новый пользователь
-socket.on('new-user', socketId => {
+// Новый пользователь подключился
+socket.on('new-user', async socketId => {
+    console.log("🟢 Новый пользователь:", socketId);
     const peer = createPeerConnection(socketId);
     peers[socketId] = peer;
 
-    // Создаем offer
-    peer.createOffer()
-        .then(offer => peer.setLocalDescription(offer))
-        .then(() => {
-            socket.emit('offer', { sdp: peer.localDescription, to: socketId, from: socket.id });
-        });
+    const offer = await peer.createOffer();
+    await peer.setLocalDescription(offer);
+    socket.emit('offer', { sdp: offer, to: socketId, from: socket.id });
 });
 
 socket.on('offer', async data => {
+    console.log("📩 Получен offer от", data.from);
     const peer = createPeerConnection(data.from);
     peers[data.from] = peer;
 
@@ -40,6 +46,7 @@ socket.on('offer', async data => {
 });
 
 socket.on('answer', async data => {
+    console.log("📩 Получен answer от", data.from);
     const peer = peers[data.from];
     if (!peer) return;
     await peer.setRemoteDescription(data.sdp);
@@ -48,10 +55,15 @@ socket.on('answer', async data => {
 socket.on('ice-candidate', async data => {
     const peer = peers[data.from];
     if (!peer) return;
-    await peer.addIceCandidate(data.candidate);
+    try {
+        await peer.addIceCandidate(data.candidate);
+    } catch (err) {
+        console.warn("⚠️ Ошибка при добавлении ICE:", err);
+    }
 });
 
 socket.on('user-disconnected', socketId => {
+    console.log("🔴 Пользователь отключился:", socketId);
     if (peers[socketId]) {
         peers[socketId].close();
         delete peers[socketId];
@@ -63,41 +75,38 @@ socket.on('user-disconnected', socketId => {
 function createPeerConnection(socketId) {
     const peer = new RTCPeerConnection({
         iceServers: [
-          { "urls": 'stun:stun.l.google.com:19302' },
-          {
-            "urls": [
-                'turn:weplok.ru:8347?transport=udp',
-                'turn:weplok.ru:8347?transport=tcp'
-            ],
-            "username": "weplok",
-            "credential": "weplok"
-          }
+            { urls: 'stun:stun.l.google.com:19302' },
+            {
+                urls: [
+                    'turn:weplok.ru:8347?transport=udp',
+                    'turn:weplok.ru:8347?transport=tcp'
+                ],
+                username: 'weplok',
+                credential: 'weplok'
+            }
         ],
-
-        // Рекомендуемые настройки для WebRTC
         iceCandidatePoolSize: 10
     });
 
-    // Логирование ICE-событий (очень помогает при отладке)
-    peer.onicecandidate = (event) => {
+    // Добавляем локальные треки
+    if (localStream) {
+        localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+    } else {
+        console.warn("⚠️ localStream ещё не готов при создании peerConnection");
+    }
+
+    // Обработка ICE кандидатов
+    peer.onicecandidate = event => {
         if (event.candidate) {
-            console.log('New ICE candidate:', event.candidate);
-            socket.emit('ice-candidate', { candidate: event.candidate, to: socketId });
+            socket.emit('ice-candidate', {
+                candidate: event.candidate,
+                to: socketId,
+                from: socket.id
+            });
         }
     };
 
-    peer.onconnectionstatechange = () => {
-        console.log('ICE connection state:', peer.connectionState);
-    };
-
-    return peer;
-}
-
-
-    // Добавляем локальные треки
-    localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
-
-    // Когда получаем трек от другого пользователя
+    // Получаем поток от другого пользователя
     peer.ontrack = event => {
         let remoteVideo = document.getElementById(socketId);
         if (!remoteVideo) {
@@ -109,10 +118,9 @@ function createPeerConnection(socketId) {
         remoteVideo.srcObject = event.streams[0];
     };
 
-    peer.onicecandidate = event => {
-        if (event.candidate) {
-            socket.emit('ice-candidate', { candidate: event.candidate, to: socketId, from: socket.id });
-        }
+    peer.onconnectionstatechange = () => {
+        console.log(`🔗 ${socketId} connection state:`, peer.connectionState);
     };
 
+    return peer;
 }
