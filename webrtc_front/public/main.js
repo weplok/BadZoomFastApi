@@ -63,6 +63,7 @@ socket.on('user-disconnected', socketId => {
 function createPeerConnection(socketId) {
     const peer = new RTCPeerConnection({
         iceServers: [
+          { "urls": 'stun:stun.l.google.com:19302' },
           {
             "urls": [
                 'turn:weplok.ru:8347?transport=udp',
