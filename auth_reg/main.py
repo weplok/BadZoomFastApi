@@ -62,7 +62,7 @@ async def home(request: Request):
     )
 
 
-@app.post("/create_room", response_class=HTMLResponse)
+@app.get("/create_room", response_class=HTMLResponse)
 async def index(request: Request):
     return RedirectResponse(f"http://138.124.14.160:8013/create_room", status_code=301)
 
