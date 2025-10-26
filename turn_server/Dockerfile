@@ -6,8 +6,8 @@ ENV TURN_PASSWORD=weplok
 ENV REALM=call.weplok.ru
 
 # Добавляем конфиг
-COPY turnserver.conf /etc/turnserver.conf
+COPY turnserver.conf /etc/turnserver/turnserver.conf
 
 EXPOSE 3478 3478/udp 5349 5349/udp
 
-CMD ["turnserver", "-c", "/etc/turnserver.conf", "-v"]
+CMD ["turnserver", "-c", "/etc/turnserver/turnserver.conf", "-v"]

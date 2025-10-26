@@ -7,7 +7,7 @@ services:
     ports:
       - "8010:8010"
     environment:
-      - PROCESSOR_URL=http://processor:8001
+      - PROCESSOR_URL=http://processor:8011
     depends_on:
       - processor
     volumes:
@@ -46,7 +46,7 @@ services:
       - TURN_PASSWORD=weplok
       - REALM=call.weplok.ru
     volumes:
-      - ./turnserver.conf:/etc/turnserver.conf
+      - ./turnserver.conf:/etc/turnserver/turnserver.conf
 
   webrtc_front:
     build: ./webrtc_front
