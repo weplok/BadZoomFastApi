@@ -162,6 +162,20 @@ async def sign_user(
         if not response_user['status']:
             raise HTTPException(status_code=400, detail=response_user['response'])
 
+        user_record = response_user['user']
+
+        current_user_data.clear()  # Очищаем предыдущие данные
+        current_user_data.update({
+            'email': user_record.email,
+            'first_name': user_record.first_name,
+            'last_name': user_record.last_name,
+            'middle_name': user_record.middle_name,
+            'position': user_record.position,
+            'is_connecting_to_rooms': user_record.is_connecting_to_rooms,
+            'is_creating_rooms': user_record.is_creating_rooms,
+            'is_admin': user_record.is_admin
+        })
+
         return RedirectResponse(url="/homepage", status_code=HTTP_303_SEE_OTHER)
 
     except Exception as e:
