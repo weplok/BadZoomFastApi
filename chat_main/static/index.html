@@ -78,19 +78,14 @@
 
   <script>
     const ws = new WebSocket(`ws://${location.host}/ws`);
-    const messagesDiv = document.getElementById('messages');
-    const input = document.getElementById('messageInput');
-    const sendBtn = document.getElementById('sendBtn');
-
-    ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message';
-      messageDiv.textContent = `${msg.sender}: ${msg.text}`;
-      messagesDiv.appendChild(messageDiv);
+@@ -29,10 +82,25 @@ <h2>Мини-чат</h2>
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     };
 
+    sendBtn.onclick = () => {
+      ws.send(input.value);
+      input.value = '';
+    };
     function sendMessage() {
       const text = input.value.trim();
       if (text) {
