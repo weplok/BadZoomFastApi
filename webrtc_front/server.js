@@ -1,7 +1,12 @@
+const fs = require('fs');
+const https = require('https');
 const express = require('express');
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+const server = https.createServer({
+  key: fs.readFileSync('localhost-key.pem'),
+  cert: fs.readFileSync('localhost.pem')
+}, app);
+const io = require('socket.io')(server);
 
 app.use(express.static('public'));
 
@@ -40,17 +45,5 @@ io.on('connection', socket => {
         socket.broadcast.emit('user-disconnected', socket.id);
     });
 });
-
-const fs = require('fs');
-const https = require('https');
-const express = require('express');
-const app = express();
-const server = https.createServer({
-  key: fs.readFileSync('localhost-key.pem'),
-  cert: fs.readFileSync('localhost.pem')
-}, app);
-const io = require('socket.io')(server);
-
-app.use(express.static('public'));
 
 server.listen(3000, () => console.log('HTTPS server on https://localhost:3000'));
