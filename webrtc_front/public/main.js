@@ -1,17 +1,19 @@
 const socket = io();
 const localVideo = document.createElement('video');
 localVideo.autoplay = true;
-localVideo.muted = true;       // нужно для автоплея локального видео
-localVideo.playsInline = true; // для Safari и мобильных
+localVideo.muted = true;
+localVideo.playsInline = true;
 
 const videosContainer = document.getElementById('videos');
 videosContainer.appendChild(localVideo);
 
 let localStream;
 let peers = {}; // {socketId: RTCPeerConnection}
+let videoEnabled = true;
+let audioEnabled = true;
 
-// Универсальная функция запуска камеры и микрофона
-async function startLocalStream() {
+// Функция запроса камеры и микрофона
+async function startLocalStream(retry = true) {
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         localVideo.srcObject = localStream;
@@ -20,19 +22,50 @@ async function startLocalStream() {
         socket.emit("ready");
     } catch (err) {
         console.error("❌ Ошибка при получении локальной камеры:", err);
-        alert("Не удалось получить доступ к камере/микрофону. Проверьте разрешения.");
+        if (retry) {
+            console.log("⏳ Попробуем снова через 15 секунд...");
+            setTimeout(() => startLocalStream(false), 15000);
+        } else {
+            alert("Не удалось получить доступ к камере/микрофону. Проверьте разрешения.");
+        }
     }
 }
 
-// Автозапуск на локальном браузере (Chrome) или по кнопке для Safari/iOS
+// Запуск камеры сразу для desktop, кнопка для Safari/iOS
 if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
     const btn = document.createElement('button');
     btn.innerText = "Включить камеру";
-    btn.onclick = startLocalStream;
+    btn.onclick = () => startLocalStream();
     document.body.appendChild(btn);
 } else {
     startLocalStream();
 }
+
+// Кнопки управления видео/аудио
+const controls = document.createElement('div');
+controls.style.margin = "10px";
+
+const videoBtn = document.createElement('button');
+videoBtn.innerText = "Выкл видео";
+videoBtn.onclick = () => {
+    if (!localStream) return;
+    videoEnabled = !videoEnabled;
+    localStream.getVideoTracks().forEach(track => track.enabled = videoEnabled);
+    videoBtn.innerText = videoEnabled ? "Выкл видео" : "Вкл видео";
+};
+
+const audioBtn = document.createElement('button');
+audioBtn.innerText = "Выкл звук";
+audioBtn.onclick = () => {
+    if (!localStream) return;
+    audioEnabled = !audioEnabled;
+    localStream.getAudioTracks().forEach(track => track.enabled = audioEnabled);
+    audioBtn.innerText = audioEnabled ? "Выкл звук" : "Вкл звук";
+};
+
+controls.appendChild(videoBtn);
+controls.appendChild(audioBtn);
+document.body.appendChild(controls);
 
 // Создание peerConnection
 function createPeerConnection(socketId) {
@@ -51,9 +84,9 @@ function createPeerConnection(socketId) {
         iceCandidatePoolSize: 10
     });
 
-    // Ждём готовность локального потока перед добавлением треков
+    // Добавляем локальные треки, клонируем поток
     if (localStream) {
-        localStream.getTracks().forEach(track => peer.addTrack(track, localStream.clone()));
+        localStream.getTracks().forEach(track => peer.addTrack(track.clone(), localStream));
     } else {
         console.warn("⏳ localStream ещё не готов при создании peerConnection");
     }
