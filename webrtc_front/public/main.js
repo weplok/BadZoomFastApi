@@ -69,8 +69,8 @@ function updateIndicators(socketId, stream) {
     const micIcon = document.getElementById(`mic-${socketId}`);
     const videoTrack = stream.getVideoTracks()[0];
     const audioTrack = stream.getAudioTracks()[0];
-    if (camIcon) camIcon.style.opacity = videoTrack && videoTrack.enabled ? '1' : '0.3';
-    if (micIcon) micIcon.style.opacity = audioTrack && audioTrack.enabled ? '1' : '0.3';
+    if (camIcon) camIcon.style.opacity = videoTrack && videoTrack.enabled ? '1' : '0';
+    if (micIcon) micIcon.style.opacity = audioTrack && audioTrack.enabled ? '1' : '0';
 }
 
 function updateLocalIndicators() {
