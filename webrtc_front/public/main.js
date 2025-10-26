@@ -65,7 +65,7 @@ function createPeerConnection(socketId) {
     iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
         {
-            urls: "turn:138.124.14.160:3478",
+            urls: "turn:138.124.14.160:8068",
             username: 'user',
             credential: 'pass'
         }
