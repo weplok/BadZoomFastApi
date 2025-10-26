@@ -55,3 +55,11 @@ services:
     depends_on:
       - turn_server
     restart: unless-stopped
+
+  rooms:
+    build: ./rooms
+    container_name: rooms
+    ports:
+      - "8013:8013"
+    volumes:
+      - ./rooms:/app

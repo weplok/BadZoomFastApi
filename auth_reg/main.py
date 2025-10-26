@@ -9,7 +9,6 @@ from starlette.status import HTTP_303_SEE_OTHER
 from database import UserRepository
 from key import generation_key
 
-
 user_repository = UserRepository()
 
 app = FastAPI(title="Система регистрации", version="1.0.0")
@@ -41,20 +40,21 @@ async def index(request: Request):
 
 @app.get("/homepage", response_class=HTMLResponse)
 async def home(request: Request):
-    full_name = '{0} {1} {2}'.format(current_user_data['first_name'], current_user_data['last_name'], current_user_data['middle_name'])
+    full_name = '{0} {1} {2}'.format(current_user_data['first_name'], current_user_data['last_name'],
+                                     current_user_data['middle_name'])
     is_admin = current_user_data['is_admin']
 
     if is_admin:
-          return templates.TemplateResponse(
-              "homepage.html",
-              {
-                  "request": request,
-                  "full_name": full_name,
-                  "title": "Домашняя страница"
-              }
+        return templates.TemplateResponse(
+            "homepage_admin.html",
+            {
+                "request": request,
+                "full_name": full_name,
+                "title": "Домашняя страница"
+            }
         )
     return templates.TemplateResponse(
-        "homepage_admin.html",
+        "homepage.html",
         {
             "request": request,
             "full_name": full_name,
@@ -74,7 +74,6 @@ async def index(request: Request):
             "title": "Создание комнаты"
         }
     )
-
 
 
 @app.get("/register", response_class=HTMLResponse)
@@ -154,7 +153,7 @@ async def sign_user(
         # Проверка email
         if "@" not in email:
             raise HTTPException(status_code=400, detail="Неверный формат email")
-        #дописать проверку на пароль и почту в бд
+        # дописать проверку на пароль и почту в бд
 
         if len(password) < 6:
             raise HTTPException(status_code=400, detail="Пароль должен содержать минимум 6 символов")
@@ -211,4 +210,5 @@ async def users_list(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
