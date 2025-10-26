@@ -61,7 +61,16 @@ socket.on('user-disconnected', socketId => {
 });
 
 function createPeerConnection(socketId) {
-    const peer = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+    const peer = new RTCPeerConnection({
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        {
+            urls: "turn:turn.anyfirewall.com:443?transport=udp",
+            username: 'username',
+            credential: 'password'
+        }
+    ]
+});
 
     // Добавляем локальные треки
     localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
