@@ -33,7 +33,7 @@ services:
     restart: unless-stopped
 
   turnserver:
-    build: .
+    build: ./turn_server
     container_name: turnserver
     restart: unless-stopped
     ports:
