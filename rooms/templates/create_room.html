@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<div class="center-container">
+
+  <form id="createroomForm" class="createroom-form" action="/create_room" method="post" onsubmit="return validateForm()">
+
+            <div class="form-group">
+                <label for="room" class="form-label">
+                    <span class="label-icon"></span>
+                    Название комнаты
+                </label>
+                <input type="text" id="room" name="room" class="form-input">
+            </div>
+      <div class="key-card">
+    <h2>Ваш ключ доступа</h2>
+    <p>{{ key }}</p>
+    </div>
+
+            <button type="submit" class="submit-btn">
+                <span class="btn-text"> Создать </span>
+            </button>
+        </form>
+</div>
+
+
+
+{% endblock %}

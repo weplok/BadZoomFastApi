@@ -1,0 +1,5 @@
+fastapi
+uvicorn[standard]
+tortoise-orm
+Jinja2
+aiofiles
