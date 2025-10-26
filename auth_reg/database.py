@@ -171,6 +171,31 @@ class UserRepository:
             return user
 
     @staticmethod
+    async def create_defoult_admin() -> User:
+        """Создание дефолтного аккаунта админа"""
+        async with db_manager.session():
+            admin_email = 'Admin@gmail.com'
+
+            response_admin = await User.filter(email=admin_email).first()
+            if response_admin:
+                logger.info(f"Дефолтный аккаунт админа уже создан: {response_admin.email}")
+                return response_admin
+
+            user = await User.create(
+                email=admin_email,
+                first_name='Иван',
+                last_name='Иванов',
+                middle_name='Иванович',
+                position='Директор',
+                password='admin1234',
+                is_connecting_to_rooms=True,
+                is_creating_rooms=True,
+                is_admin=True
+            )
+            logger.info(f"Создан дефолтный аккаунт админа: {user.email}")
+            return user
+
+    @staticmethod
     async def get_user_by_id(user_id: int) -> Optional[User]:
         """Получение пользователя по ID"""
         async with db_manager.session():
