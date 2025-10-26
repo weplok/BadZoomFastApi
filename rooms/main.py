@@ -4,17 +4,20 @@ from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from tortoise import fields
 from tortoise.contrib.fastapi import register_tortoise
 from tortoise.exceptions import DoesNotExist
 from tortoise.models import Model
+
+from key import generation_key
 
 app = FastAPI(title="Комнаты")
 # Получаем абсолютный путь к директории проекта
 BASE_DIR = Path(__file__).parent
 
 # Подключаем статические файлы с абсолютными путями
-#app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 # Подключаем шаблоны
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
@@ -56,6 +59,19 @@ register_tortoise(
     generate_schemas=True,
     add_exception_handlers=True,
 )
+
+
+@app.get("/create_room", response_class=HTMLResponse)
+async def index(request: Request):
+    key = generation_key()
+    return templates.TemplateResponse(
+        "create_room.html",
+        {
+            "request": request,
+            "key": key,
+            "title": "Создание комнаты"
+        }
+    )
 
 
 # Создание новой комнаты
