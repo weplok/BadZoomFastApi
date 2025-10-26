@@ -45,7 +45,7 @@ async def home(request: Request):
 
     if is_admin:
           return templates.TemplateResponse(
-              "homepage.html",
+              "homepage_admin.html",
               {
                   "request": request,
                   "full_name": full_name,
@@ -53,7 +53,7 @@ async def home(request: Request):
               }
         )
     return templates.TemplateResponse(
-        "homepage_admin.html",
+        "homepage.html.html",
         {
             "request": request,
             "full_name": full_name,
