@@ -1,14 +1,13 @@
-import random
 from pathlib import Path
 
 from fastapi import FastAPI, Request, HTTPException, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from tortoise import fields
-from tortoise.contrib.fastapi import register_tortoise
-from tortoise.exceptions import DoesNotExist
-from tortoise.models import Model
+from starlette.status import HTTP_303_SEE_OTHER
+
+from database import RoomRepository
+room_repository = RoomRepository()
 
 from key import generation_key
 
@@ -22,44 +21,6 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 # Подключаем шаблоны
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
-
-class Room(Model):
-    id = fields.IntField(pk=True)
-    title = fields.CharField(max_length=255)
-    code = fields.CharField(max_length=8, unique=True)
-
-    class Meta:
-        table = "rooms"
-
-
-async def generate_room_code():
-    return ''.join(str(random.randint(0, 9)) for _ in range(8))
-
-
-async def def_create_room():
-    code = await generate_room_code()
-    while await Room.exists(code=code):
-        code = await generate_room_code()
-    room = await Room.create(code=code)
-    return room
-
-
-async def get_room_by_code(code: str):
-    try:
-        room = await Room.get(code=code)
-        return room
-    except DoesNotExist:
-        return None
-
-
-# Инициализация Tortoise ORM
-register_tortoise(
-    app,
-    db_url="sqlite://rooms.db",
-    modules={"models": ["main"]},
-    generate_schemas=True,
-    add_exception_handlers=True,
-)
 
 
 @app.get("/create_room", response_class=HTMLResponse)
@@ -82,31 +43,26 @@ async def create_room(
         title: str = Form(...),
         code: str = Form(...)
 ):
-    try:
-            #TODO: Добавление комнаты в БД
-            '''key_list.clear()
-            key_list.update({
-                "title": title,
-                "code": code,
-            })'''
+        room_record = await room_repository.create_room(
+            title=title,
+            code=code
+        )
+        room_dict = room_record.to_dict()
         # Перенаправляем на домашнюю страницу
-        return RedirectResponse(url="/homepage", status_code=HTTP_303_SEE_OTHER)
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return RedirectResponse(url=f"/room/{room_dict['code']}", status_code=HTTP_303_SEE_OTHER)
 
 
 # Проверка существования комнаты
 @app.get("/room_exists/{code}")
 async def room_exists(code: str):
-    room = await get_room_by_code(code)
+    room = await room_repository.get_room_by_code(code)
     return {"exists": bool(room)}
 
 
 # Страница комнаты
 @app.get("/room/{code}", response_class=HTMLResponse)
 async def room_page(request: Request, code: str):
-    room = await get_room_by_code(code)
+    room = await room_repository.get_room_by_code(code)
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
     return templates.TemplateResponse("room.html", {"request": request, "room_code": code})

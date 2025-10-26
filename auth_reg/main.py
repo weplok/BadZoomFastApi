@@ -7,10 +7,9 @@ from pathlib import Path
 from starlette.status import HTTP_303_SEE_OTHER
 
 from database import UserRepository
-from key import generation_key
-
-
 user_repository = UserRepository()
+
+from key import generation_key
 
 app = FastAPI(title="Система регистрации", version="1.0.0")
 
