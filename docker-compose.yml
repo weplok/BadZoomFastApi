@@ -32,9 +32,25 @@ services:
       - ./auth_reg:/app
     restart: unless-stopped
 
+  turn:
+    image: instrumentisto/coturn
+    restart: unless-stopped
+    command: >
+      --log-file=stdout
+      --lt-cred-mech
+      --no-cli
+      --no-tls
+      --no-dtls
+      --realm=webrtc.local
+      --user=user:pass
+    ports:
+      - "3478:3478"
+
   webrtc_front:
     build: ./webrtc_front
     container_name: webrtc_front
     ports:
       - "3000:3000"
+    depends_on:
+      - turn
     restart: unless-stopped

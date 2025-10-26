@@ -65,9 +65,9 @@ function createPeerConnection(socketId) {
     iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
         {
-            urls: "turn:turn.anyfirewall.com:443?transport=udp",
-            username: 'username',
-            credential: 'password'
+            urls: "turn:138.124.14.160:3478",
+            username: 'user',
+            credential: 'pass'
         }
     ]
 });
