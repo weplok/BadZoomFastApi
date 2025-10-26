@@ -5,9 +5,6 @@ ENV TURN_USER=weplok
 ENV TURN_PASSWORD=weplok
 ENV REALM=call.weplok.ru
 
-# Создаём директорию для конфигов
-RUN mkdir -p /etc/turnserver
-
 # Добавляем конфиг
 COPY turnserver.conf /etc/turnserver.conf
 
