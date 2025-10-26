@@ -29,6 +29,7 @@ current_user_data: dict = {}
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
+    await user_repository.create_defoult_admin()
     return templates.TemplateResponse(
         "index.html",
         {
