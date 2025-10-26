@@ -2,18 +2,71 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>FastAPI Chat</title>
+  <title>Чат</title>
   <style>
-    body { font-family: sans-serif; max-width: 600px; margin: auto; }
-    #messages { border: 1px solid #ccc; height: 400px; overflow-y: auto; padding: 5px; }
-    input { width: 80%; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      background: white;
+    }
+
+    #inputContainer {
+      display: flex;
+      padding: 10px;
+      background: #eee;
+      border-top: 1px solid #ccc;
+    }
+
+    #messageInput {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    #sendBtn {
+      padding: 10px 20px;
+      margin-left: 10px;
+      font-size: 16px;
+      background: #0078d7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #sendBtn:hover {
+      background: #005fa3;
+    }
+
+    p {
+      margin: 5px 0;
+      word-wrap: break-word;
+    }
   </style>
 </head>
 <body>
-  <h2>Мини-чат</h2>
   <div id="messages"></div>
-  <input id="messageInput" placeholder="Введите сообщение..." />
-  <button id="sendBtn">Отправить</button>
+
+  <div id="inputContainer">
+    <input id="messageInput" placeholder="Введите сообщение..." autocomplete="off" />
+    <button id="sendBtn">➤</button>
+  </div>
 
   <script>
     const ws = new WebSocket(`ws://${location.host}/ws`);
@@ -29,10 +82,25 @@
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     };
 
-    sendBtn.onclick = () => {
-      ws.send(input.value);
-      input.value = '';
-    };
+    function sendMessage() {
+      const text = input.value.trim();
+      if (text) {
+        ws.send(text);
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    sendBtn.onclick = sendMessage;
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    input.focus();
   </script>
 </body>
 </html>
