@@ -67,8 +67,8 @@ async def index(request: Request):
     return RedirectResponse(f"http://138.124.14.160:8013/create_room", status_code=301)
 
 @app.post("/connection_room", response_class=HTMLResponse)
-async def connection_room(request: Request, code: str = Form(...)):
-    return RedirectResponse(url=f"http://138.124.14.160:8013/rooms/{code}", status_code=301)
+async def connection_room(request: Request, link: str = Form(...)):
+    return RedirectResponse(url=f"http://138.124.14.160:8013/rooms/{link}", status_code=301)
 
 
 @app.get("/register", response_class=HTMLResponse)
