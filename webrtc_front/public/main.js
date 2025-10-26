@@ -65,9 +65,8 @@ function createPeerConnection(socketId) {
         iceServers: [
           {
             "urls": [
-              "stun:call.weplok.ru:3478",
-              "turn:call.weplok.ru:3478?transport=udp",
-              "turn:call.weplok.ru:3478?transport=tcp"
+                'turn:weplok.ru:3478?transport=udp',
+                'turn:weplok.ru:3478?transport=tcp'
             ],
             "username": "weplok",
             "credential": "weplok"
