@@ -27,7 +27,15 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 current_user_data: dict = {}
 
 
-
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "title": "Главная страница"
+        }
+    )
 
 
 @app.get("/homepage", response_class=HTMLResponse)
@@ -37,12 +45,12 @@ async def home(request: Request):
 
     if is_admin:
           return templates.TemplateResponse(
-            "homepage.html",
-            {
-                "request": request,
-                "full_name": full_name,
-                "title": "Домашняя страница"
-            }
+              "homepage.html",
+              {
+                  "request": request,
+                  "full_name": full_name,
+                  "title": "Домашняя страница"
+              }
         )
     return templates.TemplateResponse(
         "homepage_admin.html",
@@ -53,17 +61,6 @@ async def home(request: Request):
         }
     )
 
-
-
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "title": "Главная страница"
-        }
-    )
 
 @app.get("/create_room", response_class=HTMLResponse)
 async def index(request: Request):
@@ -199,5 +196,4 @@ async def users_list(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)

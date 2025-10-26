@@ -1,41 +1,34 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
-
-
 <div class="center-container">
     <div class="content-card">
         <div class="head-container">
             <p class="name-title">Здравствуйте, {{ full_name }}</p>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <form id="room-linkForm" class="room-link-form" action="/сonnection_room" method="post" onsubmit="return validateForm()">
-            <div class="connect-group">
-                <label for="link" class="form-label">
-                    <span class="label-icon"></span>
-                    Введите код комнаты, чтобы подключиться:
-                </label>
-                <div class="connect-read">
-                <input type="text" id="link" name="link" class="form-input">
-                    <a class="btn-head-text" href="/room"> ➜ </a>
+            <br><br><br><br><br>
+            
+            <form id="room-linkForm" class="room-link-form" action="/connection_room" method="post" onsubmit="return validateForm()">
+                <div class="connect-group">
+                    <label for="link" class="form-label">
+                        <span class="label-icon"></span>
+                        Введите код комнаты, чтобы подключиться:
+                    </label>
+                    <div class="connect-read">
+                        <input type="text" id="link" name="link" class="form-input">
+                        <button type="submit" class="btn-head-text"> ➜ </button>
                     </div>
-            </div>
-
-        </form>
-    </div>
+                </div>
+            </form>
+        </div>
+        
         <div class="create-room">
-        <br><br>
-       <p class="name-title">――――――――ИЛИ―――――――――</p>
-        <nav class="main-nav">
-        <a class="btn-head-user-text" href="">Cоздать комнату</a>
-      </nav>
-            </div>
+            <br><br>
+            <p class="name-title">――――――――ИЛИ―――――――――</p>
+            <nav class="main-nav">
+                <a class="btn-head-user-text" href="/create_room">Cоздать комнату</a>
+            </nav>
+        </div>
 
-
-        <!-- Дополнительная информация -->
         <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
             <p style="color: #6b7280; font-size: 0.9rem;">
                 ✅ Все поля проверяются в реальном времени<br>
@@ -44,4 +37,15 @@
         </div>
     </div>
 </div>
+
+<script>
+function validateForm() {
+    const linkInput = document.getElementById('link');
+    if (!linkInput.value.trim()) {
+        alert('Пожалуйста, введите код комнаты');
+        return false;
+    }
+    return true;
+}
+</script>
 {% endblock %}

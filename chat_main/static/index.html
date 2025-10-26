@@ -54,9 +54,17 @@
       background: #005fa3;
     }
 
-    p {
-      margin: 5px 0;
+    .message {
+      margin: 8px 0;
+      padding: 8px 12px;
       word-wrap: break-word;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      display: block;
+      width: fit-content;
+      max-width: 80%;
     }
   </style>
 </head>
@@ -76,9 +84,10 @@
 
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
-      const p = document.createElement('p');
-      p.textContent = `${msg.sender}: ${msg.text}`;
-      messagesDiv.appendChild(p);
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message';
+      messageDiv.textContent = `${msg.sender}: ${msg.text}`;
+      messagesDiv.appendChild(messageDiv);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     };
 
