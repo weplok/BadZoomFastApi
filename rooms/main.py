@@ -1,7 +1,7 @@
 import random
 from pathlib import Path
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -25,6 +25,7 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 class Room(Model):
     id = fields.IntField(pk=True)
+    title = fields.CharField(max_length=255)
     code = fields.CharField(max_length=8, unique=True)
 
     class Meta:
@@ -76,9 +77,23 @@ async def index(request: Request):
 
 # Создание новой комнаты
 @app.post("/create_room")
-async def create_room():
-    room = await def_create_room()
-    return {"room_code": room.code}
+async def create_room(
+        request: Request,
+        title: str = Form(...),
+        code: str = Form(...)
+):
+    try:
+            #TODO: Добавление комнаты в БД
+            '''key_list.clear()
+            key_list.update({
+                "title": title,
+                "code": code,
+            })'''
+        # Перенаправляем на домашнюю страницу
+        return RedirectResponse(url="/homepage", status_code=HTTP_303_SEE_OTHER)
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # Проверка существования комнаты
