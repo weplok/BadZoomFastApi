@@ -1,5 +1,7 @@
 FROM coturn/coturn:latest
 
+WORKDIR /app
+
 # Настройка окружения
 ENV TURN_USER=weplok
 ENV TURN_PASSWORD=weplok
