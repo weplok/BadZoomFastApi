@@ -5,30 +5,39 @@ const io = require('socket.io')(http);
 
 app.use(express.static('public'));
 
-io.on('connection', socket => {
-    console.log('New user connected');
+const ROOM = 'main-room';
+let users = {};
 
+io.on('connection', socket => {
+    console.log('New user connected:', socket.id);
+    users[socket.id] = socket;
+
+    // Отправляем всем существующим пользователям id нового
+    socket.broadcast.emit('new-user', socket.id);
+
+    // Когда получаем offer от нового пользователя
     socket.on('offer', data => {
-        socket.to(data.to).emit('offer', data);
+        if (users[data.to]) {
+            users[data.to].emit('offer', data);
+        }
     });
 
     socket.on('answer', data => {
-        socket.to(data.to).emit('answer', data);
+        if (users[data.to]) {
+            users[data.to].emit('answer', data);
+        }
     });
 
     socket.on('ice-candidate', data => {
-        socket.to(data.to).emit('ice-candidate', data);
-    });
-
-    socket.on('join', room => {
-        socket.join(room);
-        socket.room = room;
-        const otherUsers = Array.from(io.sockets.adapter.rooms.get(room) || []).filter(id => id !== socket.id);
-        socket.emit('users', otherUsers);
+        if (users[data.to]) {
+            users[data.to].emit('ice-candidate', data);
+        }
     });
 
     socket.on('disconnect', () => {
-        console.log('User disconnected');
+        console.log('User disconnected:', socket.id);
+        delete users[socket.id];
+        socket.broadcast.emit('user-disconnected', socket.id);
     });
 });
 

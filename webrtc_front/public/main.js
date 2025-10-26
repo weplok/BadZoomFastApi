@@ -1,75 +1,88 @@
 const socket = io();
-let localStream, peerConnection;
-let myId;
+const localVideo = document.createElement('video');
+localVideo.autoplay = true;
+localVideo.muted = true;
 
-const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+const videosContainer = document.getElementById('videos');
+videosContainer.appendChild(localVideo);
 
-const localVideo = document.getElementById('localVideo');
-const remoteVideo = document.getElementById('remoteVideo');
-const joinBtn = document.getElementById('joinBtn');
-const roomInput = document.getElementById('room');
+let localStream;
+let peers = {}; // {socketId: RTCPeerConnection}
 
-joinBtn.onclick = async () => {
-    const room = roomInput.value.trim();
-    if (!room) return alert('Enter room ID');
-
-    await startLocalStream();
-    socket.emit('join', room);
-};
-
-async function startLocalStream() {
+async function start() {
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     localVideo.srcObject = localStream;
 }
 
-socket.on('users', users => {
-    if (users.length > 0) {
-        // Создаем peerConnection и вызываем первого пользователя
-        myId = socket.id;
-        createPeerConnection();
-        peerConnection.createOffer()
-            .then(offer => peerConnection.setLocalDescription(offer))
-            .then(() => {
-                socket.emit('offer', { sdp: peerConnection.localDescription, to: users[0] });
-            });
-    } else {
-        myId = socket.id;
-        createPeerConnection();
-    }
+start();
+
+// Когда приходит новый пользователь
+socket.on('new-user', socketId => {
+    const peer = createPeerConnection(socketId);
+    peers[socketId] = peer;
+
+    // Создаем offer
+    peer.createOffer()
+        .then(offer => peer.setLocalDescription(offer))
+        .then(() => {
+            socket.emit('offer', { sdp: peer.localDescription, to: socketId, from: socket.id });
+        });
 });
 
-function createPeerConnection() {
-    peerConnection = new RTCPeerConnection(configuration);
-
-    peerConnection.onicecandidate = event => {
-        if (event.candidate) {
-            socket.emit('ice-candidate', { candidate: event.candidate, to: null }); // broadcast
-        }
-    };
-
-    peerConnection.ontrack = event => {
-        remoteVideo.srcObject = event.streams[0];
-    };
-
-    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-}
-
 socket.on('offer', async data => {
-    createPeerConnection();
-    await peerConnection.setRemoteDescription(data.sdp);
-    const answer = await peerConnection.createAnswer();
-    await peerConnection.setLocalDescription(answer);
-    socket.emit('answer', { sdp: answer, to: data.from });
+    const peer = createPeerConnection(data.from);
+    peers[data.from] = peer;
+
+    await peer.setRemoteDescription(data.sdp);
+    const answer = await peer.createAnswer();
+    await peer.setLocalDescription(answer);
+    socket.emit('answer', { sdp: answer, to: data.from, from: socket.id });
 });
 
 socket.on('answer', async data => {
-    await peerConnection.setRemoteDescription(data.sdp);
+    const peer = peers[data.from];
+    if (!peer) return;
+    await peer.setRemoteDescription(data.sdp);
 });
 
 socket.on('ice-candidate', async data => {
-    try {
-        await peerConnection.addIceCandidate(data.candidate);
-    } catch (e) {
-        console.error(e);
+    const peer = peers[data.from];
+    if (!peer) return;
+    await peer.addIceCandidate(data.candidate);
+});
+
+socket.on('user-disconnected', socketId => {
+    if (peers[socketId]) {
+        peers[socketId].close();
+        delete peers[socketId];
+        const vid = document.getElementById(socketId);
+        if (vid) vid.remove();
     }
 });
+
+function createPeerConnection(socketId) {
+    const peer = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+
+    // Добавляем локальные треки
+    localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+
+    // Когда получаем трек от другого пользователя
+    peer.ontrack = event => {
+        let remoteVideo = document.getElementById(socketId);
+        if (!remoteVideo) {
+            remoteVideo = document.createElement('video');
+            remoteVideo.id = socketId;
+            remoteVideo.autoplay = true;
+            videosContainer.appendChild(remoteVideo);
+        }
+        remoteVideo.srcObject = event.streams[0];
+    };
+
+    peer.onicecandidate = event => {
+        if (event.candidate) {
+            socket.emit('ice-candidate', { candidate: event.candidate, to: socketId, from: socket.id });
+        }
+    };
+
+    return peer;
+}
