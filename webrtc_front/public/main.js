@@ -62,15 +62,39 @@ socket.on('user-disconnected', socketId => {
 
 function createPeerConnection(socketId) {
     const peer = new RTCPeerConnection({
-    iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        {
-            urls: "turn:138.124.14.160:8068",
-            username: 'user',
-            credential: 'pass'
+        iceServers: [
+            // Google STUN — чтобы быстрее находить публичный IP
+            { urls: 'stun:stun.l.google.com:19302' },
+
+            {
+                urls: [
+                    'turn:138.124.14.160:3478?transport=udp',
+                    'turn:138.124.14.160:3478?transport=tcp'
+                ],
+                username: 'weplok',
+                credential: 'weplok'
+            }
+        ],
+
+        // Рекомендуемые настройки для WebRTC
+        iceCandidatePoolSize: 10
+    });
+
+    // Логирование ICE-событий (очень помогает при отладке)
+    peer.onicecandidate = (event) => {
+        if (event.candidate) {
+            console.log('New ICE candidate:', event.candidate);
+            socket.emit('ice-candidate', { candidate: event.candidate, to: socketId });
         }
-    ]
-});
+    };
+
+    peer.onconnectionstatechange = () => {
+        console.log('ICE connection state:', peer.connectionState);
+    };
+
+    return peer;
+}
+
 
     // Добавляем локальные треки
     localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
