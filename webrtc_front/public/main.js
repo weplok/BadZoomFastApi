@@ -1,13 +1,13 @@
 const socket = io();
 
-// Контейнеры и видео
+// --- Контейнеры и видео ---
 const videosContainer = document.getElementById('videos');
 const localVideo = document.createElement('video');
 localVideo.autoplay = true;
 localVideo.muted = true;
 localVideo.playsInline = true;
 
-// Храним peerConnection и отправляемые треки
+// --- Храним peerConnection и отправляемые треки ---
 let localStream;
 let peers = {};   // {socketId: RTCPeerConnection}
 let senders = {}; // {socketId: {video: RTCRtpSender, audio: RTCRtpSender}}
@@ -77,7 +77,7 @@ function updateLocalIndicators() {
     if (localStream) addRemoteVideo('local', localStream);
 }
 
-// --- Функция запуска камеры/микрофона с повторной попыткой ---
+// --- Запуск локального потока с повторной попыткой ---
 async function startLocalStream(retry = true) {
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -120,6 +120,7 @@ videoBtn.onclick = () => {
     Object.values(senders).forEach(s => { if (s.video) s.video.track.enabled = videoEnabled; });
     videoBtn.innerText = videoEnabled ? "Выкл видео" : "Вкл видео";
     updateLocalIndicators();
+    socket.emit('media-status-changed', { "video": videoEnabled, "audio": audioEnabled });
 };
 
 const audioBtn = document.createElement('button');
@@ -131,6 +132,7 @@ audioBtn.onclick = () => {
     Object.values(senders).forEach(s => { if (s.audio) s.audio.track.enabled = audioEnabled; });
     audioBtn.innerText = audioEnabled ? "Выкл звук" : "Вкл звук";
     updateLocalIndicators();
+    socket.emit('media-status-changed', { 'video': videoEnabled, "audio": audioEnabled });
 };
 
 controls.appendChild(videoBtn);
@@ -141,8 +143,8 @@ document.body.appendChild(controls);
 function createPeerConnection(socketId) {
     const peer = new RTCPeerConnection({
         iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: ['turn:weplok.ru:8347?transport=udp','turn:weplok.ru:8347?transport=tcp'], username: 'weplok', credential: 'weplok' }
+            { "urls": 'stun:stun.l.google.com:19302' },
+            { "urls": ['turn:weplok.ru:8347?transport=udp','turn:weplok.ru:8347?transport=tcp'], "username": 'weplok', "credential": 'weplok' }
         ],
         iceCandidatePoolSize: 10
     });
@@ -209,4 +211,13 @@ socket.on('user-disconnected', socketId => {
     delete senders[socketId];
     const container = document.getElementById(`container-${socketId}`);
     if (container) container.remove();
+});
+
+// --- Синхронизация медиа-статусов ---
+socket.on('peer-media-status', data => {
+    const { id, video, audio } = data;
+    const camIcon = document.getElementById(`cam-${id}`);
+    const micIcon = document.getElementById(`mic-${id}`);
+    if (camIcon) camIcon.style.opacity = video ? '0' : '1';
+    if (micIcon) micIcon.style.opacity = audio ? '0' : '1';
 });
