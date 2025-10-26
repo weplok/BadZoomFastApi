@@ -64,15 +64,7 @@ async def home(request: Request):
 
 @app.get("/create_room", response_class=HTMLResponse)
 async def index(request: Request):
-    key = generation_key()
-    return templates.TemplateResponse(
-        "create_room.html",
-        {
-            "request": request,
-            "key": key,
-            "title": "Создание комнаты"
-        }
-    )
+    return RedirectResponse(url=f"http://138.124.14.160:8013/create_room")
 
 
 @app.post("/connection_room", response_class=HTMLResponse)
