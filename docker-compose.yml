@@ -46,7 +46,7 @@ services:
       - TURN_PASSWORD=weplok
       - REALM=call.weplok.ru
     volumes:
-      - ./turnserver.conf:/etc/turnserver/turnserver.conf
+      - ./turn_server:/app
 
   webrtc_front:
     build: ./webrtc_front
