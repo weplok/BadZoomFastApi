@@ -115,5 +115,4 @@ function createPeerConnection(socketId) {
         }
     };
 
-    return peer;
 }
