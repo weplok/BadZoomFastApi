@@ -44,7 +44,7 @@ services:
       --realm=webrtc.local
       --user=user:pass
     ports:
-      - "3478:3478"
+      - "8068:8068"
 
   webrtc_front:
     build: ./webrtc_front
