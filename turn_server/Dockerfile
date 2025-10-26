@@ -9,8 +9,8 @@ ENV REALM=call.weplok.ru
 RUN mkdir -p /etc/turnserver
 
 # Добавляем конфиг
-COPY turnserver.conf /etc/turnserver/turnserver.conf
+COPY turnserver.conf /etc/turnserver.conf
 
 EXPOSE 3478 3478/udp 5349 5349/udp
 
-CMD ["turnserver", "-c", "/etc/turnserver/turnserver.conf", "-v"]
+CMD ["turnserver", "-c", "/etc/turnserver.conf", "-v"]
