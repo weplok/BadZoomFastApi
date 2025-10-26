@@ -7,6 +7,6 @@ USER root
 COPY turnserver.conf /etc/turnserver.conf
 
 # Открываем стандартные порты STUN/TURN
-EXPOSE 3478 3478/udp 5349 5349/udp
+EXPOSE 8347 8347/udp 8534 8534/udp
 
 CMD ["turnserver", "-c", "/etc/turnserver.conf", "-v"]

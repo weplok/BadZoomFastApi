@@ -38,10 +38,10 @@ services:
     container_name: turn_server
     restart: unless-stopped
     ports:
-      - "3478:3478"
-      - "3478:3478/udp"
-      - "5349:5349"
-      - "5349:5349/udp"
+      - "8347:8347"
+      - "8347:8347/udp"
+      - "8534:8534"
+      - "8534:8534/udp"
     environment:
       - REALM=call.weplok.ru
       - TURN_USER=weplok
