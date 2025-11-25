@@ -1,4 +1,6 @@
-const socket = io();
+const socket = io({
+    path: "/webrtc/socket.io"
+});
 const localVideo = document.createElement('video');
 localVideo.autoplay = true;
 localVideo.muted = true;
@@ -81,20 +83,15 @@ document.body.appendChild(controls);
 
 // Создание peerConnection
 function createPeerConnection(socketId) {
-    const peer = new RTCPeerConnection({
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            {
-                urls: [
-                    'turn:weplok.ru:8347?transport=udp',
-                    'turn:weplok.ru:8347?transport=tcp'
-                ],
-                username: 'weplok',
-                credential: 'weplok'
-            }
-        ],
-        iceCandidatePoolSize: 10
-    });
+    var peerConfiguration = {};
+
+    (async() => {
+      const response = await fetch("https://yourappname.metered.live/api/v1/turn/credentials?apiKey=8b95a145969f967311eb03aea246dc6e76fd");
+      const iceServers = await response.json();
+      peerConfiguration.iceServers = iceServers
+    })();
+
+    const peer = new RTCPeerConnection(peerConfiguration);
 
     senders[socketId] = { video: null, audio: null };
 

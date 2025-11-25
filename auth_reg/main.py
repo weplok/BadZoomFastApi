@@ -64,11 +64,11 @@ async def home(request: Request):
 
 @app.get("/create_room", response_class=HTMLResponse)
 async def index(request: Request):
-    return RedirectResponse(f"https://rooms.weplok.ru/create_room", status_code=301)
+    return RedirectResponse(f"/rooms/create_room", status_code=301)
 
 @app.post("/connection_room", response_class=HTMLResponse)
 async def connection_room(request: Request, link: str = Form(...)):
-    return RedirectResponse(url=f"https://rooms.weplok.ru/room/{link}", status_code=301)
+    return RedirectResponse(url=f"/rooms/room/{link}", status_code=301)
 
 
 @app.get("/register", response_class=HTMLResponse)
@@ -132,27 +132,7 @@ async def register_user(
         })
 
         # Перенаправляем на домашнюю страницу
-        return RedirectResponse(url="/homepage", status_code=HTTP_303_SEE_OTHER)
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@app.post("/create_room")
-async def register_user(
-        request: Request,
-        title: str = Form(...),
-        code: str = Form(...)
-):
-    try:
-        key_list.clear()
-        key_list.update({
-            "title": title,
-            "code": code,
-        })
-        print(key_list)
-        # Перенаправляем на домашнюю страницу
-        return RedirectResponse(url="/homepage", status_code=HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/auth/homepage", status_code=HTTP_303_SEE_OTHER)
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -191,7 +171,7 @@ async def sign_user(
             'is_admin': user_record.is_admin
         })
 
-        return RedirectResponse(url="/homepage", status_code=HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/auth/homepage", status_code=HTTP_303_SEE_OTHER)
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

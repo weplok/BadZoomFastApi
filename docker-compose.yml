@@ -1,65 +1,63 @@
 version: "3.9"
 
 services:
+  gateway:
+    image: nginx:latest
+    container_name: gateway
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - main
+      - auth_reg
+      - rooms
+      - webrtc_front
+    restart: unless-stopped
+
   main:
     build: ./chat_main
     container_name: chat_main
-    ports:
-      - "8010:8010"
-    environment:
-      - PROCESSOR_URL=http://processor:8011
-    depends_on:
-      - processor
+    expose:
+      - "8010"
     volumes:
       - ./chat_main:/app
-    restart: unless-stopped
-
-  processor:
-    build: ./chat_processor
-    container_name: chat_processor
-    ports:
-      - "8011:8011"
-    volumes:
-      - ./chat_processor:/app
     restart: unless-stopped
 
   auth_reg:
     build: ./auth_reg
     container_name: auth_reg
-    ports:
-      - "8009:8009"
+    expose:
+      - "8009"
     volumes:
       - ./auth_reg:/app
-    restart: unless-stopped
-
-  turn_server:
-    build:
-      context: ./turn_server
-    container_name: turn_server
-    restart: unless-stopped
-    ports:
-      - "8347:8347"
-      - "8347:8347/udp"
-      - "8534:8534"
-      - "8534:8534/udp"
-    environment:
-      - REALM=call.weplok.ru
-      - TURN_USER=weplok
-      - TURN_PASSWORD=weplok
-
-  webrtc_front:
-    build: ./webrtc_front
-    container_name: webrtc_front
-    ports:
-      - "3000:3000"
-    depends_on:
-      - turn_server
     restart: unless-stopped
 
   rooms:
     build: ./rooms
     container_name: rooms
-    ports:
-      - "8013:8013"
+    expose:
+      - "8013"
     volumes:
       - ./rooms:/app
+    restart: unless-stopped
+
+  webrtc_front:
+    build: ./webrtc_front
+    container_name: webrtc_front
+    expose:
+      - "3000"
+    depends_on:
+      - turn_server
+    restart: unless-stopped
+
+  turn_server:
+    image: instrumentisto/coturn:latest
+    container_name: turn_server
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - ./turn_server/turnserver.conf:/etc/turnserver.conf:ro
+    environment:
+      - TURN_REALM=weplok.ru
+    command: ["turnserver", "-c", "/etc/turnserver.conf"]

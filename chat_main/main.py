@@ -1,22 +1,35 @@
-import logging
-import os
-
 import asyncio
 import datetime
-import httpx
 import json
+import logging
+import os
+from pathlib import Path
+
+import httpx
 from dotenv import load_dotenv
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sqlmodel import SQLModel, Field, create_engine, Session, select
 
+import validator
+
 app = FastAPI()
+
+# Получаем абсолютный путь к директории проекта
+BASE_DIR = Path(__file__).parent
+
+# Подключаем статические файлы с абсолютными путями
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+
+# Подключаем шаблоны
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 DATABASE_URL = "sqlite:///messages.db"
 engine = create_engine(DATABASE_URL, echo=False, connect_args={"check_same_thread": False})
 load_dotenv()
 SERVER_KEY = os.getenv("SERVER_KEY")
-PROCESSOR_URL = os.getenv("PROCESSOR_URL")
 connected_clients = set()
 logging.basicConfig(filename="chat_main.log", level=logging.INFO, encoding="UTF-8")
 client = None
@@ -25,6 +38,7 @@ client = None
 # ---------- Модель ----------
 class Message(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
+    id_in_html: str = Field(default_factory=validator.id_in_html)
     sender: str
     text: str
     room: str = "qwerty"
@@ -46,9 +60,14 @@ async def shutdown_event():
 
 
 @app.get("/", response_class=HTMLResponse)
-async def get():
-    with open("static/index.html", encoding="utf-8") as f:
-        return HTMLResponse(f.read(), media_type="text/html; charset=utf-8")
+async def get(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "title": "Главная страница"
+        }
+    )
 
 
 # ---------- WebSocket ----------
@@ -72,6 +91,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
         for msg in reversed(msgs):
             await websocket.send_text(json.dumps({
+                "htmlid": msg.id_in_html,
                 "sender": msg.sender,
                 "text": msg.text,
                 "room": msg.room,
@@ -79,36 +99,25 @@ async def websocket_endpoint(websocket: WebSocket):
                 "time": msg.timestamp.isoformat()
             }))
 
+    # Обработка получения сообщений от клиента
     try:
         while True:
             text = await websocket.receive_text()
             msg = Message(sender=user_agent, text=text, room=room)
 
-            process_message_task = asyncio.create_task(process_message(msg))
+            process_message_task = asyncio.create_task(validator.process_message(msg.text, msg.sender))
+
+            logging.info(f"New message[{msg.id_in_html}]: {msg.text}")
+
+            # Сообщения отправляются текущим connected_clients
+            await send_msg_to_clients(msg)
+
+            # Ожидаем ответ валидатора и при необходимости - отправляем новое сообщение
             process_result = await process_message_task
-            logging.info(process_result.text)
-
-            if process_result.text == '"OK"':
-                data = {
-                    "sender": msg.sender,
-                    "text": msg.text,
-                    "room": msg.room,
-                    "visibility": msg.visibility,
-                    "time": msg.timestamp.isoformat(),
-                }
-
-                # Рассылаем только тем, кто в этой комнате
-                dead = []
-                for client in connected_clients:
-                    try:
-                        # Тут можно будет хранить мапу {websocket: room}, но пока фильтруем по заглушке
-                        await client.send_text(json.dumps(data))
-                    except:
-                        dead.append(client)
-                for d in dead:
-                    connected_clients.remove(d)
-            else:
-                msg.visibility = False
+            if not process_result.is_valid:
+                logging.warning(f"Incorrect message from {msg.sender}: {process_result.reason} | text='{msg.text}'")
+                msg.text = process_result.new_message
+                await send_msg_to_clients(msg)
 
             # Сохраняем сообщение
             with Session(engine) as session:
@@ -116,21 +125,27 @@ async def websocket_endpoint(websocket: WebSocket):
                 session.commit()
                 session.refresh(msg)
 
-    except:
+    except Exception as e:
         connected_clients.remove(websocket)
 
 
-async def process_message(msg: Message):
+async def send_msg_to_clients(msg: Message):
     data = {
-        "message": msg.text,
+        "htmlid": msg.id_in_html,
         "sender": msg.sender,
-        "room": "qwerty",
+        "text": msg.text,
+        "room": msg.room,
         "visibility": msg.visibility,
-        "server_key": SERVER_KEY,
+        "time": msg.timestamp.isoformat(),
     }
-    try:
-        resp = await client.post(f"{PROCESSOR_URL}/process_message", json=data)
-        return resp
-    except httpx.RequestError as e:
-        print(f"Processing error: {e}")
-        return None
+
+    # Рассылаем только тем, кто в этой комнате
+    dead = []
+    for client in connected_clients:
+        try:
+            # Тут можно будет хранить мапу {websocket: room}, но пока фильтруем по заглушке
+            await client.send_text(json.dumps(data))
+        except:
+            dead.append(client)
+    for d in dead:
+        connected_clients.remove(d)

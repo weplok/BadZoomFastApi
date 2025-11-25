@@ -6,18 +6,18 @@ import re
 import ahocorasick
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
-
-# Настройка логирования
-logging.basicConfig(filename="chat_processor.log", level=logging.INFO, encoding="UTF-8")
-
-# Инициализация FastAPI и ключа
-app = FastAPI()
-load_dotenv()
-SERVER_KEY = os.getenv("SERVER_KEY")
+from dataclasses import dataclass
 
 # Регэксп и банворды
 ALLOWED_RE = re.compile(r'^[\w\s\-\.\,\!\?\(\)\[\]\{\}\@\#\$\%\^\&\*\:\;\"\'\/\\]+$', re.UNICODE)
 BANWORDS_FILE = "banwords.txt"
+
+@dataclass
+class ValidateResult:
+    is_valid: bool
+    reason: str
+    new_message: str = "not required"
+
 
 # Загружаем банворды из файла (если нет — создаём)
 if not os.path.exists(BANWORDS_FILE):
@@ -61,24 +61,12 @@ async def validate_message(text: str) -> tuple[bool, str]:
     return True, "OK"
 
 
-# Эндпоинт для обработки сообщений
-@app.post("/process_message")
-async def process_message(req: Request):
-    data = await req.json()
-
-    if data.get("server_key", "not-key") != SERVER_KEY:
-        logging.error("SERVER-KEY-ERROR")
-        return "invalid key"
-
-    message = data["message"]
-    sender = data["sender"]
-
+# Функция валидации сообщений
+async def process_message(msg_text, sender) -> ValidateResult:
     # ---- Валидация ----
-    is_valid, reason = await validate_message(message)
+    is_valid, reason = await validate_message(msg_text)
 
     if not is_valid:
-        logging.warning(f"Message rejected from {sender}: {reason} | text='{message}'")
-        return reason
+        return ValidateResult(is_valid=is_valid, reason=reason, new_message="Bad message! NEW CORRECT MESSAGE HERE")
 
-    logging.info(f"Message OK from {sender}: {message}")
-    return "OK"
+    return ValidateResult(is_valid=is_valid, reason=reason)

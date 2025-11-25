@@ -49,7 +49,7 @@ async def create_room(
         )
         room_dict = room_record.to_dict()
         # Перенаправляем на домашнюю страницу
-        return RedirectResponse(url=f"/room/{room_dict['code']}", status_code=HTTP_303_SEE_OTHER)
+        return RedirectResponse(url=f"/rooms/room/{room_dict['code']}", status_code=HTTP_303_SEE_OTHER)
 
 
 # Проверка существования комнаты

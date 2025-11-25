@@ -1,4 +1,0 @@
-fastapi==0.120.0
-pyahocorasick==2.2.0
-python-dotenv==1.1.1
-uvicorn==0.38.0

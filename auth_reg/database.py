@@ -1,3 +1,5 @@
+import asyncio
+
 from tortoise import Tortoise, fields
 from tortoise.models import Model
 from tortoise.transactions import in_transaction
@@ -183,9 +185,9 @@ class UserRepository:
 
             user = await User.create(
                 email=admin_email,
-                first_name='Иван',
-                last_name='Иванов',
-                middle_name='Иванович',
+                first_name='Админ',
+                last_name='Царь',
+                middle_name='Конференций',
                 position='Директор',
                 password='admin1234',
                 is_connecting_to_rooms=True,
