@@ -3,7 +3,6 @@ httptools==0.7.1
 httpx==0.28.1
 Jinja2==3.1.6
 pyahocorasick==2.2.0
-python-dotenv==1.1.1
 PyYAML==6.0.3
 requests==2.32.5
 sqlmodel==0.0.27

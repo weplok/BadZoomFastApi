@@ -6,7 +6,6 @@ import os
 from pathlib import Path
 
 import httpx
-from dotenv import load_dotenv
 from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -28,8 +27,6 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 DATABASE_URL = "sqlite:///messages.db"
 engine = create_engine(DATABASE_URL, echo=False, connect_args={"check_same_thread": False})
-load_dotenv()
-SERVER_KEY = os.getenv("SERVER_KEY")
 connected_clients = set()
 logging.basicConfig(filename="chat_main.log", level=logging.INFO, encoding="UTF-8")
 client = None
