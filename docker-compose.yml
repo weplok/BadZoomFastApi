@@ -54,7 +54,7 @@ services:
     expose:
       - "3000"
     depends_on:
-      - turn_server
+      - turn
     restart: unless-stopped
 
   turn:
