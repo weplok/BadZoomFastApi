@@ -1,3 +1,4 @@
+import 'dotenv/config';
 const socket = io({
     path: "/webrtc/socket.io"
 });
@@ -83,15 +84,30 @@ document.body.appendChild(controls);
 
 // Создание peerConnection
 function createPeerConnection(socketId) {
-    var peerConfiguration = {};
+    const configuration = {
+        iceServers: [
+            // STUN серверы
+            {
+                urls: [
+                    'stun:stun.l.google.com:19302',
+                    'stun:stun1.l.google.com:19302'
+                ]
+            },
+            // TURN сервер
+            {
+                urls: [
+                    process.env.TURN_URL_UDP,
+                    process.env.TURN_URL_TCP,
+                    process.env.TURNS_URL_UDP,
+                    process.env.TURNS_URL_TCP,
+                ],
+                username: 'static',
+                credential: process.env.TURN_SECRET
+            }
+        ]
+    };
 
-    (async() => {
-      const response = await fetch("https://yourappname.metered.live/api/v1/turn/credentials?apiKey=8b95a145969f967311eb03aea246dc6e76fd");
-      const iceServers = await response.json();
-      peerConfiguration.iceServers = iceServers
-    })();
-
-    const peer = new RTCPeerConnection(peerConfiguration);
+    const peer = new RTCPeerConnection(configuration);
 
     senders[socketId] = { video: null, audio: null };
 

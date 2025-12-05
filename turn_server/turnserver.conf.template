@@ -1,0 +1,48 @@
+# ===== BASIC =====
+
+listening-port=3478
+tls-listening-port=5349
+
+listening-ip=0.0.0.0
+relay-ip=0.0.0.0
+
+external-ip=${EXTERNAL_IP}
+
+realm=${TURN_REALM}
+
+# ===== AUTH =====
+
+use-auth-secret
+static-auth-secret=${TURN_SECRET}
+userdb=/var/lib/turn/turndb
+
+# ===== CERTIFICATES =====
+
+cert=/certs/fullchain.pem
+pkey=/certs/privkey.pem
+
+# ===== NETWORK =====
+
+no-tcp-relay
+
+min-port=49152
+max-port=65535
+
+# ===== LOGGING =====
+
+log-file=/var/log/turnserver/turn.log
+simple-log
+
+# ===== SECURITY =====
+
+no-multicast-peers
+no-cli
+no-tlsv1
+no-tlsv1_1
+cipher-list="TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"
+
+# ===== STUN/TURN =====
+
+fingerprint
+lt-cred-mech
+

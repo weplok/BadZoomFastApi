@@ -45,19 +45,34 @@ services:
   webrtc_front:
     build: ./webrtc_front
     container_name: webrtc_front
+    environment:
+      TURN_URL_UDP: ${TURN_URL_UDP}
+      TURN_URL_TCP: ${TURN_URL_TCP}
+      TURNS_URL_UDP: ${TURNS_URL_UDP}
+      TURNS_URL_TCP: ${TURNS_URL_TCP}
+      TURN_SECRET: ${TURN_SECRET}
     expose:
       - "3000"
     depends_on:
       - turn_server
     restart: unless-stopped
 
-  turn_server:
-    image: instrumentisto/coturn:latest
+  turn:
+    image: coturn/coturn:latest
     container_name: turn_server
-    restart: unless-stopped
+    restart: always
     network_mode: "host"
+    environment:
+      EXTERNAL_IP: ${EXTERNAL_IP}
+      TURN_REALM: ${TURN_REALM}
+      TURN_SECRET: ${TURN_SECRET}
     volumes:
       - ./turn_server/turnserver.conf:/etc/turnserver.conf:ro
-    environment:
-      - TURN_REALM=weplok.ru
-    command: ["turnserver", "-c", "/etc/turnserver.conf"]
+      - /etc/letsencrypt/live/turn1.weplok.ru/fullchain.pem:/certs/fullchain.pem:ro
+      - /etc/letsencrypt/live/turn1.weplok.ru/privkey.pem:/certs/privkey.pem:ro
+      - turn_logs:/var/log/turnserver
+    entrypoint: ["/entrypoint.sh"]
+    command: [ "-c", "/etc/turnserver.conf" ]
+
+volumes:
+  turn_logs:
