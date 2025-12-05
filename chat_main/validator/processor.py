@@ -4,7 +4,6 @@ import os
 import re
 
 import ahocorasick
-from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from dataclasses import dataclass
 

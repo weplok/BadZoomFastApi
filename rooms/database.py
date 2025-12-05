@@ -99,7 +99,7 @@ class Room(Model):
     code - сгенерированный код
     """
     id = fields.IntField(pk=True)
-    title = fields.CharField(max_length=255)
+    title = fields.CharField(max_length=255, default="Комната")
     code = fields.CharField(max_length=8, unique=True)
 
     class Meta:

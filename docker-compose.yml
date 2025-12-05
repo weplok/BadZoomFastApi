@@ -54,10 +54,10 @@ services:
     expose:
       - "3000"
     depends_on:
-      - turn
+      - turn_server
     restart: unless-stopped
 
-  turn:
+  turn_server:
     image: coturn/coturn:latest
     container_name: turn_server
     restart: always
@@ -67,7 +67,8 @@ services:
       TURN_REALM: ${TURN_REALM}
       TURN_SECRET: ${TURN_SECRET}
     volumes:
-      - ./turn_server/turnserver.conf:/etc/turnserver.conf:ro
+      - ./turn_server/entrypoint.sh:/etc/entrypoint.sh:ro
+      - ./turn_server/turnserver.conf.template:/etc/turnserver.conf.template:ro
       - /etc/letsencrypt/live/turn1.weplok.ru/fullchain.pem:/certs/fullchain.pem:ro
       - /etc/letsencrypt/live/turn1.weplok.ru/privkey.pem:/certs/privkey.pem:ro
       - turn_logs:/var/log/turnserver
