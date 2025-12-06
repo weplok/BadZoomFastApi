@@ -10,6 +10,17 @@ app.use(express.static('public'));
 const ROOM = 'main-room';
 let users = {};
 
+app.get("/config", (req, res) => {
+  res.json({
+    turnUdp: process.env.TURN_URL_UDP,
+    turnTcp: process.env.TURN_URL_TCP,
+    turnsUdp: process.env.TURNS_URL_UDP,
+    turnsTcp: process.env.TURNS_URL_TCP,
+    secret: process.env.TURN_SECRET,
+    test: process.env.TEST_ENV
+  });
+});
+
 io.on('connection', socket => {
     console.log('New user connected:', socket.id);
     users[socket.id] = socket;

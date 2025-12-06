@@ -58,22 +58,18 @@ services:
     restart: unless-stopped
 
   turn_server:
-    image: coturn/coturn:latest
+    build:
+      context: ./turn_server
+      dockerfile: Dockerfile
     container_name: turn_server
+    network_mode: host
+    user: root
     restart: always
-    network_mode: "host"
-    environment:
-      EXTERNAL_IP: ${EXTERNAL_IP}
-      TURN_REALM: ${TURN_REALM}
-      TURN_SECRET: ${TURN_SECRET}
+    env_file: .env
     volumes:
-      - ./turn_server/entrypoint.sh:/etc/entrypoint.sh:ro
-      - ./turn_server/turnserver.conf.template:/etc/turnserver.conf.template:ro
-      - /etc/letsencrypt/live/turn1.weplok.ru/fullchain.pem:/certs/fullchain.pem:ro
-      - /etc/letsencrypt/live/turn1.weplok.ru/privkey.pem:/certs/privkey.pem:ro
       - turn_logs:/var/log/turnserver
-    entrypoint: ["/entrypoint.sh"]
-    command: [ "-c", "/etc/turnserver.conf" ]
+      - /etc/letsencrypt/live/${TURN_DOMAIN}/fullchain.pem:/certs/fullchain.pem:ro
+      - /etc/letsencrypt/live/${TURN_DOMAIN}/privkey.pem:/certs/privkey.pem:ro
 
 volumes:
   turn_logs:

@@ -1,4 +1,3 @@
-import 'dotenv/config';
 const socket = io({
     path: "/webrtc/socket.io"
 });
@@ -84,7 +83,9 @@ document.body.appendChild(controls);
 
 // Создание peerConnection
 function createPeerConnection(socketId) {
-    const configuration = {
+    (async () => {
+      const config = await fetch("/webrtc/config").then(r => r.json());
+      const configuration = {
         iceServers: [
             // STUN серверы
             {
@@ -96,16 +97,17 @@ function createPeerConnection(socketId) {
             // TURN сервер
             {
                 urls: [
-                    process.env.TURN_URL_UDP,
-                    process.env.TURN_URL_TCP,
-                    process.env.TURNS_URL_UDP,
-                    process.env.TURNS_URL_TCP,
+                    config.turnUdp,
+                    config.turnTcp,
+                    config.turnsUdp,
+                    config.turnsTcp,
                 ],
                 username: 'static',
-                credential: process.env.TURN_SECRET
+                credential: config.secret
             }
         ]
     };
+    })();
 
     const peer = new RTCPeerConnection(configuration);
 
