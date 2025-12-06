@@ -14,6 +14,8 @@ services:
       - rooms
       - webrtc_front
     restart: unless-stopped
+    profiles:
+      - all_except_turn
 
   main:
     build: ./chat_main
@@ -32,6 +34,8 @@ services:
     volumes:
       - ./auth_reg:/app
     restart: unless-stopped
+    profiles:
+      - all_except_turn
 
   rooms:
     build: ./rooms
@@ -53,9 +57,9 @@ services:
       TURN_SECRET: ${TURN_SECRET}
     expose:
       - "3000"
-    depends_on:
-      - turn_server
     restart: unless-stopped
+    profiles:
+      - all_except_turn
 
   turn_server:
     build:
@@ -70,6 +74,8 @@ services:
       - turn_logs:/var/log/turnserver
       - /etc/letsencrypt/live/${TURN_DOMAIN}/fullchain.pem:/certs/fullchain.pem:ro
       - /etc/letsencrypt/live/${TURN_DOMAIN}/privkey.pem:/certs/privkey.pem:ro
+    profiles:
+      - turn_only
 
 volumes:
   turn_logs:
