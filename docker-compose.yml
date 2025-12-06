@@ -15,7 +15,7 @@ services:
       - webrtc_front
     restart: unless-stopped
     profiles:
-      - all_except_turn
+      - no_turn
 
   main:
     build: ./chat_main
@@ -25,6 +25,8 @@ services:
     volumes:
       - ./chat_main:/app
     restart: unless-stopped
+    profiles:
+      - no_turn
 
   auth_reg:
     build: ./auth_reg
@@ -35,7 +37,7 @@ services:
       - ./auth_reg:/app
     restart: unless-stopped
     profiles:
-      - all_except_turn
+      - no_turn
 
   rooms:
     build: ./rooms
@@ -45,6 +47,8 @@ services:
     volumes:
       - ./rooms:/app
     restart: unless-stopped
+    profiles:
+      - no_turn
 
   webrtc_front:
     build: ./webrtc_front
@@ -59,7 +63,7 @@ services:
       - "3000"
     restart: unless-stopped
     profiles:
-      - all_except_turn
+      - no_turn
 
   turn_server:
     build:
