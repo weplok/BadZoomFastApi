@@ -9,6 +9,6 @@ COPY turnserver.conf.template /usr/local/bin/turnserver.conf.template
 
 EXPOSE 3478 3478/udp 5349 5349/udp
 
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 CMD ["turnserver"]
