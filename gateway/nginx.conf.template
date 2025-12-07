@@ -6,7 +6,7 @@ http {
     server {
         listen 80;
         server_name ${NGINX_SERVER_NAMES};
-        
+
         # HTTP → HTTPS redirect (если нужен SSL)
         include /etc/nginx/ssl.conf;
 
