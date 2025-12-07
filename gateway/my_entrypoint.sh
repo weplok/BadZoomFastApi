@@ -13,7 +13,7 @@ is_ssl_enabled() {
     esac
 }
 
-if is_ssl_enabled "$SSL_CERTIFICATE" && is_ssl_enabled "$SSL_CERTIFICATE_KEY"; then
+if is_ssl_enabled "$SSL_CERTIFICATES"; then
     echo "SSL enabled — generating ssl.conf..."
     envsubst '$SSL_CERTIFICATE $SSL_CERTIFICATE_KEY' \
         < /usr/local/bin/ssl.conf.template > /etc/nginx/ssl.conf

@@ -6,6 +6,9 @@ services:
       context: ./gateway
       dockerfile: Dockerfile
     env_file: .env
+    volumes:
+      - /etc/letsencrypt/live/${NGINX_SERVER_NAME}/fullchain.pem:/certs/fullchain.pem:ro
+      - /etc/letsencrypt/live/${NGINX_SERVER_NAME}/privkey.pem:/certs/privkey.pem:ro
     ports:
       - "80:80"
     depends_on:
@@ -14,15 +17,6 @@ services:
       - rooms
       - webrtc_front
     restart: unless-stopped
-
-  # SSL надстройка
-  gateway_ssl:
-    extends:
-      service: gateway
-    profiles: ["ssl"]
-    volumes:
-      - ${SSL_CERTIFICATE}:/certs/fullchain.pem:ro
-      - ${SSL_CERTIFICATE_KEY}:/certs/privkey.pem:ro
 
   chat_main:
     build: ./chat_main
