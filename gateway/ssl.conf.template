@@ -1,5 +1,5 @@
 # This file appears only if SSL_CERTIFICATE and SSL_CERTIFICATE_KEY are set
 listen 443 ssl;
 
-ssl_certificate /certs/fullchain.pem;
-ssl_certificate_key /certs/privkey.pem;
+ssl_certificate /etc/letsencrypt/live/weplok.ru/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/weplok.ru/privkey.pem;

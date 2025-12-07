@@ -7,8 +7,7 @@ services:
       dockerfile: Dockerfile
     env_file: .env
     volumes:
-      - /etc/letsencrypt/live/${NGINX_SERVER_NAME}/fullchain.pem:/certs/fullchain.pem:ro
-      - /etc/letsencrypt/live/${NGINX_SERVER_NAME}/privkey.pem:/certs/privkey.pem:ro
+      - /etc/letsencrypt/:/etc/letsencrypt/:ro
     ports:
       - "80:80"
     depends_on:
