@@ -10,7 +10,7 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - main
+      - chat_main
       - auth_reg
       - rooms
       - webrtc_front
@@ -18,7 +18,7 @@ services:
     profiles:
       - no_turn
 
-  main:
+  chat_main:
     build: ./chat_main
     container_name: chat_main
     expose:
