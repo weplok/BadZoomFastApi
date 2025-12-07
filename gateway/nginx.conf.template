@@ -7,8 +7,68 @@ http {
         listen 80;
         server_name ${NGINX_SERVER_NAMES};
 
+        # WebSocket для чата
+        location /main/ws {
+            proxy_pass http://chat_main:8010/ws;
+
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Основной чат
+        location /main/ {
+            proxy_pass http://chat_main:8010/;
+        }
+
+        # Регистрация / авторизация
+        location /auth/ {
+            proxy_pass http://auth_reg:8009/;
+        }
+
+        # Комнаты
+        location /rooms/ {
+            proxy_pass http://rooms:8013/;
+        }
+
+        # WebRTC socket.io
+        location /webrtc/socket.io/ {
+            proxy_pass http://webrtc_front:3000;
+
+            # Обязательные настройки для WebSocket / Socket.IO
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+
+            # Прокидываем ip и host
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # WebRTC Frontend
+        location /webrtc/ {
+            proxy_pass http://webrtc_front:3000/;
+        }
+
+        # headers обязательно!
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    server {
         # SSL включается через отдельный файл
         include /etc/nginx/ssl.conf;
+
+        server_name ${NGINX_SERVER_NAMES};
 
         # WebSocket для чата
         location /main/ws {
