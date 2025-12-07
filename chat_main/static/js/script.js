@@ -1,4 +1,5 @@
-const ws = new WebSocket(`ws://${location.host}/main/ws`);
+const wsProtocol = location.protocol === "https:" ? "wss:" : "ws:";
+const ws = new WebSocket(`${wsProtocol}//${location.host}/main/ws`);
 const messagesDiv = document.getElementById('messages');
 const input = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
