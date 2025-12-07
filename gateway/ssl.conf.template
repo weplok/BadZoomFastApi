@@ -1,5 +1,5 @@
 # This file appears only if SSL_CERTIFICATE and SSL_CERTIFICATE_KEY are set
 listen 443 ssl;
 
-ssl_certificate ${SSL_CERTIFICATE};
-ssl_certificate_key ${SSL_CERTIFICATE_KEY};
+ssl_certificate /certs/fullchain.pem;
+ssl_certificate_key /certs/privkey.pem;
