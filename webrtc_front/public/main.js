@@ -1,6 +1,7 @@
 const socket = io({
     path: "/webrtc/socket.io"
 });
+
 const localVideo = document.createElement('video');
 localVideo.autoplay = true;
 localVideo.muted = true;
@@ -10,7 +11,7 @@ const videosContainer = document.getElementById('videos');
 videosContainer.appendChild(localVideo);
 
 let localStream;
-let peers = {}; // {socketId: RTCPeerConnection}
+let peers = {};   // {socketId: RTCPeerConnection}
 let senders = {}; // {socketId: {video: RTCRtpSender, audio: RTCRtpSender}}
 let videoEnabled = true;
 let audioEnabled = true;
@@ -53,12 +54,7 @@ videoBtn.onclick = () => {
     if (!localStream) return;
     videoEnabled = !videoEnabled;
     localStream.getVideoTracks().forEach(track => track.enabled = videoEnabled);
-
-    // Отключаем/включаем отправку видео по всем peerConnection
-    Object.values(senders).forEach(s => {
-        if (s.video) s.video.track.enabled = videoEnabled;
-    });
-
+    Object.values(senders).forEach(s => { if (s.video) s.video.track.enabled = videoEnabled; });
     videoBtn.innerText = videoEnabled ? "Выкл видео" : "Вкл видео";
 };
 
@@ -68,12 +64,7 @@ audioBtn.onclick = () => {
     if (!localStream) return;
     audioEnabled = !audioEnabled;
     localStream.getAudioTracks().forEach(track => track.enabled = audioEnabled);
-
-    // Отключаем/включаем отправку аудио по всем peerConnection
-    Object.values(senders).forEach(s => {
-        if (s.audio) s.audio.track.enabled = audioEnabled;
-    });
-
+    Object.values(senders).forEach(s => { if (s.audio) s.audio.track.enabled = audioEnabled; });
     audioBtn.innerText = audioEnabled ? "Выкл звук" : "Вкл звук";
 };
 
@@ -81,39 +72,23 @@ controls.appendChild(videoBtn);
 controls.appendChild(audioBtn);
 document.body.appendChild(controls);
 
-// Создание peerConnection
-function createPeerConnection(socketId) {
-    (async () => {
-      const config = await fetch("/webrtc/config").then(r => r.json());
-      const configuration = {
+// Асинхронное создание PeerConnection
+async function createPeerConnection(socketId) {
+    const config = await fetch("/webrtc/config").then(r => r.json());
+    const configuration = {
         iceServers: [
-            // STUN серверы
+            { urls: ['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302'] },
             {
-                urls: [
-                    'stun:stun.l.google.com:19302',
-                    'stun:stun1.l.google.com:19302'
-                ]
-            },
-            // TURN сервер
-            {
-                urls: [
-                    config.turnUdp,
-                    config.turnTcp,
-                    config.turnsUdp,
-                    config.turnsTcp,
-                ],
+                urls: [config.turnUdp, config.turnTcp, config.turnsUdp, config.turnsTcp],
                 username: 'static',
                 credential: config.secret
             }
         ]
     };
-    })();
 
     const peer = new RTCPeerConnection(configuration);
-
     senders[socketId] = { video: null, audio: null };
 
-    // Добавляем локальные треки и сохраняем RTCRtpSender
     if (localStream) {
         localStream.getTracks().forEach(track => {
             const sender = peer.addTrack(track, localStream);
@@ -151,7 +126,7 @@ function createPeerConnection(socketId) {
 // Socket.io события
 socket.on('new-user', async socketId => {
     console.log("🟢 Новый пользователь:", socketId);
-    const peer = createPeerConnection(socketId);
+    const peer = await createPeerConnection(socketId);
     peers[socketId] = peer;
 
     try {
@@ -164,7 +139,7 @@ socket.on('new-user', async socketId => {
 });
 
 socket.on('offer', async data => {
-    const peer = createPeerConnection(data.from);
+    const peer = await createPeerConnection(data.from);
     peers[data.from] = peer;
 
     try {
