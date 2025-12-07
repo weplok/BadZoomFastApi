@@ -1,25 +1,22 @@
 #!/usr/bin/env sh
 set -e
 
-# Проверка переменных окружения
-[ -z "$NGINX_SERVER_NAMES" ] && echo "ERROR: NGINX_SERVER_NAMES is not set!" && exit 1
-
-# Подставляем env в template
-VARS='$NGINX_SERVER_NAMES $SSL_CERTIFICATE $SSL_CERTIFICATE_KEY'
-
+# Подставляем переменные в основной конфиг
+VARS='$NGINX_SERVER_NAMES'
 envsubst "$VARS" < /usr/local/bin/nginx.conf.template > /etc/nginx/nginx.conf
 
-# Условно генерируем SSL конфиг
-is_disabled() {
+# Генерируем ssl.conf только если сертификаты указаны
+is_ssl_enabled() {
     case "$1" in
-        ""|false|False|0) return 0 ;;  # значение считается "выключено"
-        *) return 1 ;;                 # любое другое значение — "включено"
+        ""|false|False|0) return 1 ;;
+        *) return 0 ;;
     esac
 }
 
-if ! is_disabled "$SSL_CERTIFICATE" && ! is_disabled "$SSL_CERTIFICATE_KEY"; then
+if is_ssl_enabled "$SSL_CERTIFICATE" && is_ssl_enabled "$SSL_CERTIFICATE_KEY"; then
     echo "SSL enabled — generating ssl.conf..."
-    envsubst "$VARS" < /usr/local/bin/ssl.conf.template > /etc/nginx/ssl.conf
+    envsubst '$SSL_CERTIFICATE $SSL_CERTIFICATE_KEY' \
+        < /usr/local/bin/ssl.conf.template > /etc/nginx/ssl.conf
 else
     echo "SSL disabled — creating empty ssl.conf..."
     echo "" > /etc/nginx/ssl.conf
