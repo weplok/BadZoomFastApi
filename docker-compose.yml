@@ -53,6 +53,7 @@ services:
       TURN_URL_TCP: ${TURN_URL_TCP}
       TURNS_URL_UDP: ${TURNS_URL_UDP}
       TURNS_URL_TCP: ${TURNS_URL_TCP}
+      TURN_REALM: ${TURN_REALM}
       TURN_SECRET: ${TURN_SECRET}
     expose:
       - "3000"

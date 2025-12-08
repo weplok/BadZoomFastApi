@@ -4,20 +4,36 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     path: '/webrtc/socket.io'
 });
+const CryptoJS = require("crypto-js");
 
 app.use(express.static('public'));
 
 const ROOM = 'main-room';
 let users = {};
 
+function generateTurnCredentials(realm, secret) {
+  // <timestamp>:<realm>
+  const username = `${Math.floor(Date.now() / 1000)}:${realm}`;
+
+  // HMAC-SHA1(username, secret) → Base64
+  const password = CryptoJS.HmacSHA1(username, secret)
+    .toString(CryptoJS.enc.Base64);
+
+  return { username, password };
+}
+
 app.get("/config", (req, res) => {
+
+  const creds = generateTurnCredentials(process.env.TURN_REALM, process.env.TURN_SECRET);
+
   res.json({
     turnUdp: process.env.TURN_URL_UDP,
     turnTcp: process.env.TURN_URL_TCP,
     turnsUdp: process.env.TURNS_URL_UDP,
     turnsTcp: process.env.TURNS_URL_TCP,
-    secret: process.env.TURN_SECRET,
-    test: process.env.TEST_ENV
+
+    username: creds.username,
+    password: creds.password
   });
 });
 

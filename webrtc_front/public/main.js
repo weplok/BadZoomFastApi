@@ -80,8 +80,8 @@ async function createPeerConnection(socketId) {
             { urls: ['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302'] },
             {
                 urls: [config.turnUdp, config.turnTcp, config.turnsUdp, config.turnsTcp],
-                username: 'static',
-                credential: config.secret
+                username: config.username,
+                credential: config.password
             }
         ]
     };
