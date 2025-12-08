@@ -22,7 +22,8 @@ pkey=/certs/privkey.pem
 
 # ===== NETWORK =====
 
-no-tcp-relay
+tcp-relay
+tcp-keepalive 60
 
 min-port=49152
 max-port=65535
