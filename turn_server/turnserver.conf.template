@@ -8,6 +8,7 @@ relay-ip=0.0.0.0
 
 external-ip=${EXTERNAL_IP}
 
+domain=${TURN_DOMAIN}
 realm=${TURN_REALM}
 
 # ===== AUTH =====
