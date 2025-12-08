@@ -15,7 +15,7 @@ is_ssl_enabled() {
 
 if is_ssl_enabled "$SSL_CERTIFICATES"; then
     echo "SSL enabled — generating ssl.conf..."
-    envsubst '$VARS' < /usr/local/bin/ssl.conf.template > /etc/nginx/ssl.conf
+    envsubst "$VARS" < /usr/local/bin/ssl.conf.template > /etc/nginx/ssl.conf
 else
     echo "SSL disabled — creating empty ssl.conf..."
     echo "" > /etc/nginx/ssl.conf
