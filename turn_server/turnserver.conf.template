@@ -14,7 +14,6 @@ realm=${TURN_REALM}
 
 use-auth-secret
 static-auth-secret=${TURN_SECRET}
-userdb=/var/lib/turn/turndb
 
 # ===== CERTIFICATES =====
 
@@ -44,5 +43,3 @@ cipher-list="TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"
 # ===== STUN/TURN =====
 
 fingerprint
-lt-cred-mech
-
