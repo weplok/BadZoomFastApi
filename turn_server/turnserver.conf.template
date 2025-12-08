@@ -8,7 +8,6 @@ relay-ip=0.0.0.0
 
 external-ip=${EXTERNAL_IP}
 
-domain=${TURN_DOMAIN}
 realm=${TURN_REALM}
 
 # ===== AUTH =====
@@ -23,9 +22,6 @@ pkey=/certs/privkey.pem
 
 # ===== NETWORK =====
 
-tcp-relay
-tcp-keepalive 60
-
 min-port=49152
 max-port=65535
 
@@ -38,8 +34,6 @@ simple-log
 
 no-multicast-peers
 no-cli
-no-tlsv1
-no-tlsv1_1
 cipher-list="TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"
 
 # ===== STUN/TURN =====
