@@ -13,7 +13,8 @@ let users = {};
 
 function generateTurnCredentials(realm, secret) {
   // <timestamp>:<realm>
-  const username = `${Math.floor(Date.now() / 1000)}:${realm}`;
+  const timestamp = Math.floor(Date.now()/1000) + 24*3600; // TTL 24h
+  const username = `${timestamp}:realm`;
 
   // HMAC-SHA1(username, secret) → Base64
   const password = CryptoJS.HmacSHA1(username, secret)
