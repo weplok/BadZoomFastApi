@@ -4,44 +4,50 @@
 
 
 <div class="center-container">
-    <div class="content-card">
-        <div class="head-container">
-            <p class="name-title">Здравствуйте, {{ full_name }}</p>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <form id="room-linkForm" class="room-link-form" action="/auth/connection_room" method="post" onsubmit="return validateForm()">
-            <div class="connect-group">
-                <label for="link" class="form-label">
-                    <span class="label-icon"></span>
-                    Введите код комнаты, чтобы подключиться:
-                </label>
-                <div class="connect-read">
-                <input type="text" id="link" name="link" class="form-input">
-                    <button type="submit" class="btn-head-text"> ➜ </button>
-                    </div>
-            </div>
+  <div class="content-card">
+    <div class="head-container">
+      <p class="name-title">Здравствуйте, {{ full_name }}</p>
+      <form action="/auth/logout" method="post">
+        <button type="submit" class="btn-head-user-text">
+          Выйти
+        </button>
+      </form>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <form id="room-linkForm" class="room-link-form" action="/auth/connection_room" method="post"
+            onsubmit="return validateForm()">
+        <div class="connect-group">
+          <label for="link" class="form-label">
+            <span class="label-icon"></span>
+            Введите код комнаты, чтобы подключиться:
+          </label>
+          <div class="connect-read">
+            <input type="text" id="link" name="link" class="form-input">
+            <button type="submit" class="btn-head-text"> ➜</button>
+          </div>
+        </div>
 
-        </form>
+      </form>
     </div>
-        <div class="create-room">
-        <br><br>
-       <p class="name-title">――――――――ИЛИ―――――――――</p>
-        <nav class="main-nav">
+    <div class="create-room">
+      <br><br>
+      <p class="name-title">――――――――ИЛИ―――――――――</p>
+      <nav class="main-nav">
         <a class="btn-head-text" href="/auth/create_room">Cоздать комнату</a>
       </nav>
-            </div>
-
-
-        <!-- Дополнительная информация -->
-        <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-            <p style="color: #6b7280; font-size: 0.9rem;">
-                ✅ Все поля проверяются в реальном времени<br>
-                🔒 Ваши данные в безопасности
-            </p>
-        </div>
     </div>
+
+
+    <!-- Дополнительная информация -->
+    <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+      <p style="color: #6b7280; font-size: 0.9rem;">
+        ✅ Все поля проверяются в реальном времени<br>
+        🔒 Ваши данные в безопасности
+      </p>
+    </div>
+  </div>
 </div>
 {% endblock %}

@@ -1,7 +1,8 @@
 from pathlib import Path
 
-from fastapi import FastAPI, Request, HTTPException, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI, Request, HTTPException, Form, Depends
+from fastapi.middleware import Middleware
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.status import HTTP_303_SEE_OTHER
@@ -11,7 +12,9 @@ room_repository = RoomRepository()
 
 from key import generation_key
 
-app = FastAPI(title="Комнаты")
+from jwtapi import get_current_user, AuthMiddleware
+
+app = FastAPI(title="Комнаты", middleware=[Middleware(AuthMiddleware)])
 # Получаем абсолютный путь к директории проекта
 BASE_DIR = Path(__file__).parent
 
@@ -20,7 +23,6 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 # Подключаем шаблоны
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
-
 
 
 @app.get("/create_room", response_class=HTMLResponse)
@@ -61,8 +63,38 @@ async def room_exists(code: str):
 
 # Страница комнаты
 @app.get("/room/{code}", response_class=HTMLResponse)
-async def room_page(request: Request, code: str):
+async def room_page(request: Request, code: str, current_user_data: dict = Depends(get_current_user)):
+    if current_user_data is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    if len(code) != 8:
+        raise HTTPException(status_code=404, detail="Incorrect room id length")
     room = await room_repository.get_room_by_code(code)
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
     return templates.TemplateResponse("room.html", {"request": request, "room_code": code})
+
+
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    # Если пользователь не авторизован -> отправляем на /auth
+    if exc.status_code == 401:
+        return RedirectResponse(url="/auth", status_code=302)
+    # Если комната не найдена -> отправляем на спец. страницу, оттуда - на homepage
+    if exc.status_code == 404:
+        return RedirectResponse(url="/rooms/404", status_code=302)
+
+    # Для других ошибок — свой HTML-шаблон или JSON
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
+@app.get("/404", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse(
+        "404.html",
+        {
+            "request": request,
+            "title": "Неизвестная комната"
+        }
+    )

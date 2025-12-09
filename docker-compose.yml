@@ -23,6 +23,11 @@ services:
     container_name: chat_main
     expose:
       - "8010"
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      ACCESS_COOKIE_NAME: ${ACCESS_COOKIE_NAME}
+      REFRESH_COOKIE_NAME: ${REFRESH_COOKIE_NAME}
     volumes:
       - ./chat_main:/app
     restart: unless-stopped
@@ -32,6 +37,14 @@ services:
     container_name: auth_reg
     expose:
       - "8009"
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN}
+      ACCESS_COOKIE_NAME: ${ACCESS_COOKIE_NAME}
+      REFRESH_COOKIE_NAME: ${REFRESH_COOKIE_NAME}
     volumes:
       - ./auth_reg:/app
     restart: unless-stopped
@@ -41,6 +54,11 @@ services:
     container_name: rooms
     expose:
       - "8013"
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      ACCESS_COOKIE_NAME: ${ACCESS_COOKIE_NAME}
+      REFRESH_COOKIE_NAME: ${REFRESH_COOKIE_NAME}
     volumes:
       - ./rooms:/app
     restart: unless-stopped

@@ -403,11 +403,23 @@ body {
     background: white;
 }
 
+.btn-logout {
+    color: #EA4640;
+    border: 2px solid #EA4640;
+}
+
 /* Эффект наведения */
 .btn-head-text:hover {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
     box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-logout:hover {
+    background: linear-gradient(135deg, #CA3C37, #EA4640);
+    color: white;
+    box-shadow: 0 5px 15px #D8413B59;
     transform: translateY(-2px);
 }
 
@@ -531,6 +543,14 @@ img {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+
+.hello-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* текст слева, кнопка справа */
+    width: 100%;
 }
 
 

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="center-container">
+    <div class="content-card">
+        <img src="/rooms/static/images/sad_cat.jpg">
+
+        <div class="create-room">
+            <br><br>
+            <p class="name-title">――――――――404―――――――――</p>
+            <label class="form-label">
+              <span class="label-icon"></span>
+                Комнаты с таким номером не существует :(<br>
+                Проверьте, что код состоит из 8 цифр.
+            </label>
+          <a href="/auth/homepage">
+            <button class="btn-head-text"> Вернуться назад </button>
+          </a>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+            <p style="color: #6b7280; font-size: 0.9rem;">
+                ✅ Все поля проверяются в реальном времени<br>
+                🔒 Ваши данные в безопасности
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

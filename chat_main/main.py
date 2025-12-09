@@ -3,18 +3,24 @@ import datetime
 import json
 import logging
 import os
+from http.cookies import SimpleCookie
 from pathlib import Path
 
 import httpx
+import jwt
 from fastapi import FastAPI, Request, WebSocket
-from fastapi.responses import HTMLResponse
+from fastapi.exceptions import HTTPException
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware import Middleware
 from fastapi.templating import Jinja2Templates
 from sqlmodel import SQLModel, Field, create_engine, Session, select
 
 import validator
 
-app = FastAPI()
+from jwtapi import AuthMiddleware
+
+app = FastAPI(middleware=[Middleware(AuthMiddleware)])
 
 # Получаем абсолютный путь к директории проекта
 BASE_DIR = Path(__file__).parent
@@ -30,6 +36,10 @@ engine = create_engine(DATABASE_URL, echo=False, connect_args={"check_same_threa
 connected_clients = set()
 logging.basicConfig(filename="chat_main.log", level=logging.INFO, encoding="UTF-8")
 client = None
+
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+JWT_SECRET = os.getenv("JWT_SECRET", "secret")
+ACCESS_COOKIE_NAME = os.getenv("ACCESS_COOKIE_NAME", "access-name")
 
 
 # ---------- Модель ----------
@@ -67,13 +77,47 @@ async def get(request: Request):
     )
 
 
+# Парсер куки для получения JWT юзера
+def parse_cookies_from_header(cookie_header: str) -> dict:
+    if not cookie_header:
+        return {}
+    c = SimpleCookie()
+    c.load(cookie_header)
+    return {k: morsel.value for k, morsel in c.items()}
+
+
 # ---------- WebSocket ----------
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
+
+    cookie_header = None
+    for k, v in websocket.headers.raw:
+        # raw — list of tuples bytes, decode
+        hk = k.decode().lower()
+        if hk == "cookie":
+            cookie_header = v.decode()
+            break
+
+    cookies = parse_cookies_from_header(cookie_header)
+    token = cookies.get(ACCESS_COOKIE_NAME)
+    user = None
+    if token:
+        try:
+            payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            if payload.get("type") == "access":
+                user = payload
+        except Exception:
+            user = None
+
+    if not user:
+        # можно закрыть соединение с 401
+        await websocket.close(code=1008)
+        return
+
     connected_clients.add(websocket)
 
-    user_agent = websocket.headers.get("user-agent", "Unknown user")
+    user_name = f"{user['last_name']} {user['first_name'][0]}.{user['middle_name'][0]}."
     room = "qwerty"  # заглушка, потом можно будет менять по URL или параметру
 
     # Загружаем последние 50 сообщений из нужной комнаты
@@ -100,7 +144,7 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             text = await websocket.receive_text()
-            msg = Message(sender=user_agent, text=text, room=room)
+            msg = Message(sender=user_name, text=text, room=room)
 
             process_message_task = asyncio.create_task(validator.process_message(msg.text, msg.sender))
 
@@ -124,6 +168,27 @@ async def websocket_endpoint(websocket: WebSocket):
 
     except Exception as e:
         connected_clients.remove(websocket)
+
+
+@app.exception_handler(HTTPException)
+async def websocket_http_exception_handler(request: Request, exc: HTTPException):
+    if request.scope["type"] == "websocket":
+        websocket: WebSocket = request.scope.get("websocket")
+
+        if websocket and websocket.application_state == WebSocketState.CONNECTED:
+            # отображаем 401 как 1008
+            code = 1008 if exc.status_code == 401 else 1011
+            await websocket.close(code=code, reason=exc.detail)
+        return
+
+    # обычный HTTP запрос → как раньше
+    if exc.status_code == 401:
+        return RedirectResponse(url="/auth", status_code=302)
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
 
 
 async def send_msg_to_clients(msg: Message):

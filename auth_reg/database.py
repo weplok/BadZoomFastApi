@@ -6,12 +6,15 @@ from tortoise.transactions import in_transaction
 from contextlib import asynccontextmanager
 from typing import List, Dict, Any, Optional, AsyncGenerator
 import logging
+from passlib.context import CryptContext
 
 
 logger = logging.getLogger(__name__)
 
 # Константы
 DB_URL = 'sqlite://{name_db}.db'
+
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
 class DatabaseManager:
@@ -164,7 +167,7 @@ class UserRepository:
                 last_name=last_name,
                 middle_name=middle_name,
                 position=position,
-                password=password,
+                password=pwd_context.hash(password),
                 is_connecting_to_rooms=is_connecting_to_rooms,
                 is_creating_rooms=is_creating_rooms,
                 is_admin=is_admin
@@ -189,7 +192,7 @@ class UserRepository:
                 last_name='Царь',
                 middle_name='Конференций',
                 position='Директор',
-                password='admin1234',
+                password=pwd_context.hash('admin1234'),
                 is_connecting_to_rooms=True,
                 is_creating_rooms=True,
                 is_admin=True
@@ -214,12 +217,12 @@ class UserRepository:
     @staticmethod
     async def get_sign_user(email: str, password: str) -> Dict[str, Any]:
         async with db_manager.session():
-            response_email = await User.filter(email=email).first()
-            if response_email is None:
+            response_user = await User.filter(email=email).first()
+            if response_user is None:
                 return {'status': False, 'response': 'Email не найден', 'user': None}
 
-            response_user = await User.filter(email=email, password=password).first()
-            if response_user is None:
+            true_password = pwd_context.verify(password, response_user.password)
+            if not true_password:
                 return {'status': False, 'response': 'Не верный пароль', 'user': None}
 
             return {'status': True, 'response': 'Пользователь найден', 'user': response_user}
