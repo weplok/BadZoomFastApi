@@ -6,12 +6,14 @@
 <div class="center-container">
   <div class="content-card">
     <div class="head-container">
-      <p class="name-title">Здравствуйте, {{ full_name }}</p>
-      <form action="/auth/logout" method="post">
-        <button type="submit" class="btn-head-user-text">
-          Выйти
-        </button>
-      </form>
+      <div class="hello-container">
+        <p class="name-title">Здравствуйте, {{ full_name }}</p>
+        <form action="/auth/logout" method="post">
+          <button type="submit" class="btn-head-text btn-logout">
+            Выйти
+          </button>
+        </form>
+      </div>
       <br>
       <br>
       <br>
