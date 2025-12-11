@@ -313,9 +313,9 @@ window.addEventListener('load', function() {
     }
 
     const imageSources = [
-        'img/sputnic.png',
-        'img/users.png',
-        'img/chats.png'
+        '/auth/static/images/sputnic.png',
+        '/auth/static/images/users.png',
+        '/auth/static/images/chats.png'
     ];
 
     setTimeout(() => {

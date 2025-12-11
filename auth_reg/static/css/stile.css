@@ -57,6 +57,26 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.sign-card {
+    background: var(--card-background);
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+}
+
+/* Карточка контента главной страницы*/
+.content-card {
+    background: var(--card-background);
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 /* Заголовок */
 .form-header {
     text-align: center;
@@ -88,10 +108,18 @@ body {
     gap: 1.5rem;
 }
 
+.sign-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
 /* Группы полей */
 .form-group {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+
 }
 
 .form-label {
@@ -130,7 +158,8 @@ body {
 }
 
 /* Кнопка отправки */
-.submit-btn {
+.submit-registration-btn,
+.submit-sign-btn {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
     border: none;
@@ -141,18 +170,22 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 1rem;
-    position: center;
+    position: relative;
     overflow: hidden;
 }
 
-.submit-btn:hover {
+.submit-registration-btn:hover,
+.submit-sign-btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
 }
 
-.submit-btn:active {
+.submit-registration-btn:active,
+.submit-sign-btn:active {
     transform: translateY(-1px);
 }
+
+
 
 /* Сообщения об ошибках */
 .error-message {
@@ -288,6 +321,133 @@ body {
     flex: 1;
 }
 
+
+.index-header {
+    width: 100%;
+    background: var(--card-background);
+    box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    animation: fadeInDown 0.6s ease-out;
+}
+
+
+.home-header {
+    width: 100%;
+    background: var(--card-background);
+    box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    animation: fadeInDown 0.6s ease-out;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.header-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-home-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Навигация в шапке */
+.main-nav {
+    display: flex;
+    gap: 1rem;
+}
+
+
+.name-title {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+/* Ссылки в шапке */
+.btn-head-text {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.btn-logout {
+    color: #EA4640;
+    border: 2px solid #EA4640;
+}
+
+/* Эффект наведения */
+.btn-head-text:hover {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-logout:hover {
+    background: linear-gradient(135deg, #CA3C37, #EA4640);
+    color: white;
+    box-shadow: 0 5px 15px #D8413B59;
+    transform: translateY(-2px);
+}
+
+/* При нажатии */
+.btn-head-text:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .header-container {
+        justify-content: center;
+        padding: 0.8rem 1rem;
+    }
+
+    .main-nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .btn-head-text {
+        width: 100%;
+        text-align: center;
+    }
+}
+
 .error-message {
     background: #fef2f2;
     border: 1px solid #fecaca;
@@ -309,3 +469,128 @@ body {
         transform: translateY(0);
     }
 }
+
+
+
+
+.home-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+
+.head-main{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+
+img {
+    width: 100%;         /* занимает всю ширину родительского блока */
+    height: auto;        /* сохраняет пропорции */
+    max-height: 500px;   /* ограничение по высоте */
+    object-fit: cover;   /* аккуратно обрезает, если картинка выше */
+    display: block;      /* убирает отступ снизу */
+}
+
+
+.main-nav {
+    padding: 20px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+
+.btn-head-user-text {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #6c757d; /* серый цвет кнопки */
+    color: #ffffff; /* белый текст */
+    text-decoration: none;
+    font-weight: 600;
+    font-family: Arial, sans-serif;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-head-user-text:hover {
+    background-color: #5a6268; /* немного темнее при наведении */
+}
+
+.create-room {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+}
+
+
+.connect-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.connect-read {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+
+.hello-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* текст слева, кнопка справа */
+    width: 100%;
+}
+
+
+/* окно комнаты */
+
+.center-container {
+    width: 100%;
+    max-width: 30px;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+
+
+.key-card {
+    background: var(--card-background);
+    padding: 2rem 2.5rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-align: center;
+    margin-top: 1.5rem;
+    animation: fadeInUp 0.8s ease-out;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.key-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.15);
+}
+
+.key-card h2 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.key-card p {
+    color: var(--text-color);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
