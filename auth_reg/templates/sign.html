@@ -1,53 +1,238 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badzoom - Вход</title>
+    <link rel="preload" href="/auth/static/images/planet.jpg" as="image">
+    <link rel="stylesheet" href="/auth/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .login-section {
+            min-height: 100vh;
+            padding: 100px 0;
+            background-color: #0a0a0a;
+            color: #f0f0f0;
+            position: relative;
+        }
 
-{% block content %}
-<div class="center-container">
-    <div class="sign-card">
-        <div class="form-header">
-            <span class="form-icon">👤</span>
-            <h1>Вход в аккаунт</h1>
-            <p class="form-subtitle">Заполните все поля</p>
-        </div>
+        .login-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, transparent, #4dabf7, transparent);
+        }
 
-        <form id="signForm" class="sign-form" action="/auth/sign" method="post" onsubmit="return validateForm('sign')">
+        .login-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
 
-            <!-- Email -->
-            <div class="form-group">
-                <label for="email" class="form-label">
-                    <span class="label-icon">📧</span>
-                    Email адрес
-                </label>
-                <input type="email" id="email" name="email" class="form-input" placeholder="your.email@example.com" required>
+        .login-header h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: white;
+            position: relative;
+            display: inline-block;
+        }
+
+        .login-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #4dabf7, transparent);
+        }
+
+        .login-header p {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .login-card {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-label {
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .form-input {
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4dabf7;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(77, 171, 247, 0.3);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .submit-btn {
+            margin-top: 10px;
+            padding: 18px;
+            background: transparent;
+            border: 2px solid white;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: white;
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .submit-btn:hover {
+            color: black;
+        }
+
+        .submit-btn:hover::before {
+            left: 0;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 30px;
+            color: #b0b0b0;
+        }
+
+        .register-link a {
+            color: #4dabf7;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .register-link a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .login-section {
+                padding: 80px 0;
+            }
+
+            .login-header h1 {
+                font-size: 2.5rem;
+            }
+
+            .login-card {
+                padding: 30px 20px;
+                margin: 0 20px;
+            }
+
+            .form-input {
+                font-size: 16px;
+                min-height: 50px;
+            }
+
+            .submit-btn {
+                min-height: 50px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-header h1 {
+                font-size: 2rem;
+            }
+
+            .login-card {
+                padding: 25px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="login-section" id="login">
+        <div class="container">
+            <div class="login-header">
+                <h1>Вход в аккаунт</h1>
+                <p>Войдите в свой аккаунт Badzoom</p>
             </div>
 
+            <div class="login-card">
+        <form id="signForm" class="login-form" action="/auth/sign" method="post" onsubmit="return validateForm('sign')">
+                    <div class="form-group">
+                        <label for="login_email" class="form-label">Email адрес</label>
+                        <input type="email" id="login_email" class="form-input" placeholder="your.email@example.com" required>
+                    </div>
 
-            <!-- Пароли в одном ряду -->
-            <div class="form-row" style="display: flex; gap: 5px;">
-                <div class="form-group" style="flex: 1;">
-                    <label for="password" class="form-label">
-                        <span class="label-icon">🔒</span>
-                        Пароль
-                    </label>
-                    <input type="password" id="password" name="password" class="form-input" placeholder="Введите пароль" required>
+                    <div class="form-group">
+                        <label for="login_password" class="form-label">Пароль</label>
+                        <input type="password" id="login_password" class="form-input" placeholder="Введите пароль" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Войти</button>
+                </form>
+
+                <div class="register-link">
+                    <p>Нет аккаунта? <a href="/auth/register">Зарегистрироваться</a></p>
                 </div>
             </div>
-
-            <button type="submit" class="submit-btn">
-                <span class="btn-text">🚀 Войти </span>
-            </button>
-        </form>
-
-        <!-- Сообщения об ошибках -->
-        <div id="errorMessage" class="error-message" style="display: none;">Уведомление</div>
-
-        <!-- Дополнительная информация -->
-        <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-            <p style="color: #6b7280; font-size: 0.9rem;">
-                ✅ Все поля проверяются в реальном времени<br>
-                🔒 Ваши данные в безопасности
-            </p>
         </div>
-    </div>
-</div>
+    </section>
 
-{% endblock %}
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Badzoom. Платформа для видеозвонков студентов</p>
+            <p>Сделано студентами для студентов. Просто и удобно.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

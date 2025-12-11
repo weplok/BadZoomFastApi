@@ -1,59 +1,400 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badzoom - Личный кабинет</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
 
-{% block content %}
-<div class="center-container">
-  <div class="content-card">
-    <div class="head-container">
-      <div class="hello-container">
-        <p class="name-title">Здравствуйте, {{ full_name }}</p>
-        <form action="/auth/logout" method="post">
-          <button type="submit" class="btn-head-text btn-logout">
-            Выйти
-          </button>
-        </form>
-      </div>
-      <br><br><br><br><br>
+        body {
+            min-height: 100vh;
+            background-color: #0a0a0a;
+            color: #f0f0f0;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-      <form id="room-linkForm" class="room-link-form" action="/auth/connection_room" method="post"
-            onsubmit="return validateForm()">
-        <div class="connect-group">
-          <label for="link" class="form-label">
-            <span class="label-icon"></span>
-            Введите код комнаты, чтобы подключиться:
-          </label>
-          <div class="connect-read">
-            <input type="text" id="link" name="link" class="form-input">
-            <button type="submit" class="btn-head-text"> ➜</button>
-          </div>
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, transparent, #4dabf7, transparent);
+            z-index: 1000;
+        }
+
+        .center-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px;
+        }
+
+        .content-card {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .content-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(77, 171, 247, 0.5), transparent);
+        }
+
+        .head-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .name-title {
+            font-size: 2.8rem;
+            color: white;
+            margin-bottom: 15px;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+        }
+
+        .name-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #4dabf7, transparent);
+        }
+
+        .welcome-text {
+            color: #b0b0b0;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .room-link-form {
+            margin: 40px 0;
+        }
+
+        .connect-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-label {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .label-icon::before {
+            content: '🔗';
+            font-size: 1.2rem;
+        }
+
+        .connect-read {
+            display: flex;
+            gap: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-input {
+            flex: 1;
+            padding: 18px 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4dabf7;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(77, 171, 247, 0.3);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-head-text {
+            padding: 18px 35px;
+            background: transparent;
+            border: 2px solid white;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 60px;
+        }
+
+        .btn-head-text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: white;
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn-head-text:hover {
+            color: black;
+        }
+
+        .btn-head-text:hover::before {
+            left: 0;
+        }
+
+        .create-room {
+            text-align: center;
+            margin: 50px 0;
+        }
+
+        .create-room .name-title {
+            font-size: 1.4rem;
+            color: #b0b0b0;
+            font-weight: 400;
+            letter-spacing: 3px;
+        }
+
+        .create-room .name-title::after {
+            display: none;
+        }
+
+        .main-nav {
+            margin-top: 30px;
+        }
+
+        .btn-head-user-text {
+            display: inline-block;
+            padding: 20px 50px;
+            background: transparent;
+            border: 2px solid #4dabf7;
+            border-radius: 12px;
+            color: #4dabf7;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn-head-user-text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: #4dabf7;
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn-head-user-text:hover {
+            color: black;
+        }
+
+        .btn-head-user-text:hover::before {
+            left: 0;
+        }
+
+        .security-info {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #b0b0b0;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        .security-info p {
+            margin: 10px 0;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+
+        .footer .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .footer p {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .center-container {
+                padding: 80px 20px;
+            }
+
+            .content-card {
+                padding: 30px 20px;
+                margin: 0 10px;
+            }
+
+            .name-title {
+                font-size: 2.2rem;
+            }
+
+            .connect-read {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .btn-head-text {
+                width: 100%;
+                padding: 18px;
+            }
+
+            .btn-head-user-text {
+                padding: 18px 40px;
+                font-size: 1.2rem;
+            }
+
+            .form-input {
+                font-size: 16px;
+                min-height: 50px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .name-title {
+                font-size: 1.8rem;
+            }
+
+            .content-card {
+                padding: 25px 15px;
+            }
+
+            .welcome-text {
+                font-size: 1rem;
+            }
+
+            .form-label {
+                font-size: 1rem;
+            }
+        }
+
+        .error-message {
+            display: none;
+            padding: 15px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            color: #f87171;
+            font-size: 0.95rem;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="center-container">
+        <div class="content-card">
+            <div class="head-container">
+                <p class="name-title">Здравствуйте, {{ full_name }}</p>
+                <p class="welcome-text">Добро пожаловать в ваш личный кабинет Badzoom</p>
+                <form id="room-linkForm" class="room-link-form" action="/auth/connection_room" method="post" onsubmit="return validateForm()">
+                    <div class="connect-group">
+                        <label for="link" class="form-label">
+                            <span class="label-icon"></span>
+                            Введите код комнаты, чтобы подключиться:
+                        </label>
+                        <div class="connect-read">
+                            <input type="text" id="link" name="link" class="form-input" placeholder="Например: 123456">
+                            <button type="submit" class="btn-head-text">➜</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="create-room">
+                <p class="name-title">―――――――― ИЛИ ―――――――――</p>
+                <nav class="main-nav">
+                    <a href="#" class="btn-head-user-text">Создать комнату</a>
+                </nav>
+            </div>
         </div>
-      </form>
     </div>
 
-    <div class="create-room">
-      <br><br>
-      <p class="name-title">――――――――ИЛИ―――――――――</p>
-      <nav class="main-nav">
-        <a class="btn-head-user-text">Cоздать комнату</a>
-      </nav>
-    </div>
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Badzoom. Платформа для видеозвонков студентов</p>
+            <p>Сделано студентами для студентов. Просто и удобно.</p>
+        </div>
+    </footer>
 
-    <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-      <p style="color: #6b7280; font-size: 0.9rem;">
-        ✅ Все поля проверяются в реальном времени<br>
-        🔒 Ваши данные в безопасности
-      </p>
-    </div>
-  </div>
-</div>
-
-<script>
-  function validateForm() {
-      const linkInput = document.getElementById('link');
-      if (!linkInput.value.trim()) {
-          alert('Пожалуйста, введите код комнаты');
-          return false;
-      }
-      return true;
-  }
-</script>
-{% endblock %}
+    <script>
+    function validateForm() {
+        const linkInput = document.getElementById('link');
+        if (!linkInput.value.trim()) {
+            alert('Пожалуйста, введите код комнаты');
+            return false;
+        }
+        return true;
+    }
+    </script>
+</body>
+</html>
+</html>

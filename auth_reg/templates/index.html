@@ -1,29 +1,124 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badzoom - Главная</title>
+    <link rel="preload" href="/auth/static/images/planet.jpg" as="image">
+    <link rel="stylesheet" href="/auth/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <section class="parallax-section" id="home">
+        <div class="parallax-bg">
+            <div class="image-loading">Загрузка ...</div>
+        </div>
 
+        <header class="transparent-header">
+            <div class="container">
+                <div class="nav-left">
+                    <a href="#home" class="logo">
+                        <i class="fas fa-camera"></i>
+                        <span>Badzoom</span>
+                    </a>
+                </div>
 
-{% block content %}
+                <div class="nav-right">
+                    <div class="auth-buttons">
+                        <a href="/auth/sign" class="nav-btn login-btn">Войти</a>
+                        <a href="/auth/register" class="nav-btn register-btn">Зарегистрироваться</a>
+                    </div>
+                </div>
+            </div>
+        </header>
 
+        <div class="hero-content">
+            <h1 class="hero-title">Добро пожаловать на Badzoom</h1>
+        </div>
+    </section>
 
-<div class="center-container">
-    <div class="content-card">
-        <img src="/auth/static/images/cat1.jpg">
-        <br>
-        <br>
-        <br>
-        <div class="head-main">
-        <nav class="main-nav">
-        <a class="btn-head-text" href="/auth/sign">Войти</a>
-        <a class="btn-head-text" href="/auth/register">Зарегистрироваться</a>
-      </nav>
+    <section class="content-section" id="about">
+        <div class="container">
+            <h2>О нашем сайте Badzoom</h2>
+
+            <div class="slider-container">
+                <button class="slider-btn prev-btn" aria-label="Предыдущая карточка">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+
+                <div class="card active">
+                    <div class="card-content">
+                        <div class="card-text">
+                            <h3>Хорошая связь</h3>
+                            <p>Видеозвонки, которые не лагают. Работает даже на слабом интернете.</p>
+                            <ul>
+                                <li>Видео и звук хорошего качества</li>
+                                <li>Минимальные задержки</li>
+                                <li>Работает со всеми браузерами</li>
+                                <li>Безопасные соединения</li>
+                            </ul>
+                        </div>
+                        <div class="card-image">
+                            <img src="/auth/static/images/sputnic.png" alt="Спутниковая связь" class="feature-image">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-text">
+                            <h3>Для студентов</h3>
+                            <p>Площадка, где студенты могут общаться и учиться вместе.</p>
+                            <ul>
+                                <li>Находите одногруппников</li>
+                                <li>Групповые звонки до 20 человек</li>
+                                <li>Делитесь материалами к учебе</li>
+                                <li>Помогайте друг другу с заданиями</li>
+                            </ul>
+                        </div>
+                        <div class="card-image">
+                            <img src="/auth/static/images/users.png" alt="Сообщество студентов" class="feature-image">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-text">
+                            <h3>Удобные чаты</h3>
+                            <p>Общайтесь не только голосом. Пишите, делитесь файлами, создавайте опросы.</p>
+                            <ul>
+                                <li>Отправка сообщений и ссылок</li>
+                                <li>Создание опросов</li>
+                                <li>Открытые чаты во время звонков</li>
+                            </ul>
+                        </div>
+                        <div class="card-image">
+                            <img src="/auth/static/images/chats.png" alt="Умные чаты" class="feature-image">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="slider-btn next-btn" aria-label="Следующая карточка">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
 
-        <!-- Дополнительная информация -->
-        <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-            <p style="color: #6b7280; font-size: 0.9rem;">
-                ✅ Все поля проверяются в реальном времени<br>
-                🔒 Ваши данные в безопасности
-            </p>
+            <div class="slider-dots">
+                <button class="dot active" data-slide="0" aria-label="Перейти к слайду 1"></button>
+                <button class="dot" data-slide="1" aria-label="Перейти к слайду 2"></button>
+                <button class="dot" data-slide="2" aria-label="Перейти к слайду 3"></button>
+            </div>
         </div>
-    </div>
-</div>
-{% endblock %}
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Badzoom.Ай лучшая платформа для видеозвонков студентов</p>
+            <p>Сделано студентами для студентов.</p>
+        </div>
+    </footer>
+
+    <script src="/auth/static/js/script.js"></script>
+</body>
+</html>
