@@ -207,18 +207,34 @@
 
             <div class="login-card">
         <form id="signForm" class="login-form" action="/auth/sign" method="post" onsubmit="return validateForm('sign')">
-                    <div class="form-group">
-                        <label for="email" class="form-label">Email адрес</label>
-                        <input type="email" id="email" class="form-input" placeholder="your.email@example.com" required>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="password" class="form-label">Пароль</label>
-                        <input type="password" id="password" class="form-input" placeholder="Введите пароль" required>
-                    </div>
+            <!-- Email -->
+            <div class="form-group">
+                <label for="email" class="form-label">
+                    <span class="label-icon">📧</span>
+                    Email адрес
+                </label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="your.email@example.com" required>
+            </div>
 
-                    <button type="submit" class="submit-btn">Войти</button>
-                </form>
+
+            <!-- Пароли в одном ряду -->
+            <div class="form-row" style="display: flex; gap: 5px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="password" class="form-label">
+                        <span class="label-icon">🔒</span>
+                        Пароль
+                    </label>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Введите пароль" required>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                <span class="btn-text">🚀 Войти </span>
+            </button>
+        </form>
+
+
 
                 <div class="register-link">
                     <p>Нет аккаунта? <a href="/auth/register">Зарегистрироваться</a></p>
